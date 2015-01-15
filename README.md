@@ -29,6 +29,11 @@ Data locations:
   - additional ID mappings: `/home/unix/mostafav/projects/cogdec_mnet/phenotype_data/pheno_cov_n2963_092014_forPLINK.csv`
   - technical factors for RNA-seq data: `/home/unix/mostafav/projects/cogdec_mnet/phenotype_data/techvars_plus_phenotypes26SEP2014.txt`
 
+Expression data
+---------------
+
+The residual data is a TSV file, where the rows are patients and the columns are genes. 
+
 Genotype data
 -------------
 
