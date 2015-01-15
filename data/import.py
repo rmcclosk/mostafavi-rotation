@@ -19,7 +19,7 @@ with open("refGene.txt") as f:
     con.commit()
 
 # import CpGs
-cpg_query = make_insert_query("CpG", 30)
+cpg_query = make_insert_query("CpG", 33)
 cpg_gene_query = make_insert_query("CpGGene", 4)
 
 with open("wgEncodeHaibMethyl450CpgIslandDetails.txt") as f:
@@ -32,14 +32,11 @@ with open("wgEncodeHaibMethyl450CpgIslandDetails.txt") as f:
         id = row[0]
         if not id.startswith("c"): continue
 
-        cpg_values = []
+        cur.execute(cpg_query, row)
         cpg_gene_values = [[]]
         for i in range(ncol):
-            if not header[i].startswith("UCSC_RefGene"):
-                cpg_values.append(row[i])
-            else:
+            if header[i].startswith("UCSC_RefGene"):
                 cpg_gene_values.append(row[i].split(";"))
-        cur.execute(cpg_query, cpg_values)
 
         cpg_gene_values = itertools.zip_longest(*cpg_gene_values, fillvalue=id)
         for v in cpg_gene_values:
