@@ -47,4 +47,5 @@ with open("wgEncodeHaibMethyl450CpgIslandDetails.txt") as f:
                 cur.execute(cpg_gene_query, v)
             except sqlite3.IntegrityError: # old transcript not in refGene
                 pass
+    con.commit()
 con.close()
