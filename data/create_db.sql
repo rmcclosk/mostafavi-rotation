@@ -55,10 +55,196 @@ CREATE TABLE IF NOT EXISTS refGene (
     exonFrames TEXT
 );
 
+CREATE TABLE IF NOT EXISTS ensGene (
+    bin INTEGER,
+    name TEXT,
+    chrom TEXT,
+    strand TEXT,
+    txStart INTEGER,
+    txEnd INTEGER,
+    cdsStart INTEGER,
+    cdsEnd INTEGER,
+    exonCount INTEGER,
+    exonStarts TEXT,
+    exonEnds TEXT,
+    score INTEGER,
+    name2 TEXT PRIMARY KEY,
+    cdsStartStat TEXT,
+    cdsEndStat TEXT,
+    exonFrames TEXT
+);
+
 CREATE TABLE IF NOT EXISTS CpGGene (
     IlmnID TEXT REFERENCES CpG(IlmnID),
     UCSC_RefGene_Name TEXT,
     UCSC_RefGene_Accession TEXT REFERENCES refGene(name),
     UCSC_RefGene_Group TEXT,
     PRIMARY KEY (IlmnID, UCSC_RefGene_Accession)
+);
+
+CREATE TABLE IF NOT EXISTS projectID (
+    id INTEGER PRIMARY KEY
+);
+
+CREATE TABLE IF NOT EXISTS methylationMeta (
+    Sample_ID TEXT PRIMARY KEY,   
+    globcog_lv REAL,
+    cog_ps_lv REAL,
+    cog_wo_lv REAL,
+    projid INTEGER REFERENCES projectID(id),
+    cogdx INTEGER,
+    age_death REAL,
+    educ INTEGER,
+    msex INTEGER,
+    pmAD INTEGER,
+    studyn INTEGER,
+    cogdx_45v123 INTEGER,
+    cogdx_4v1 INTEGER,
+    pathoAD INTEGER,
+    np_sqrt REAL,
+    nft_sqrt REAL,
+    gpath_sqrt REAL,
+    globcog_random_slope REAL,
+    cog_ep_random_slope REAL,
+    cog_ep_random_deadslope REAL,
+    globcog_random_deadslope REAL,
+    `set` INTEGER,
+    dlbany INTEGER,
+    dlb_cortical_any INTEGER,
+    mbc REAL,
+    IID TEXT,
+    FID TEXT,
+    NNLS REAL,
+    mratio REAL
+);
+
+CREATE TABLE IF NOT EXISTS methylation (
+    Sample_ID TEXT REFERENCES methylationMeta(Sample_ID),
+    TargetID TEXT REFERENCES CpG(IlmnID),
+    value REAL,
+    PRIMARY KEY (Sample_ID, TargetID)
+);
+
+CREATE TABLE IF NOT EXISTS expression (
+    Sample TEXT,
+    ProjectID INTEGER REFERENCES projectID(id),
+    gene_name TEXT,
+    ensembl_id TEXT REFERENCES ensGene(name2),
+    value REAL,
+    PRIMARY KEY (Sample, ensembl_id)
+);
+
+CREATE TABLE IF NOT EXISTS acetylationPeaks (
+    Peak TEXT PRIMARY KEY,
+    Start INTEGER,
+    End INTEGER,
+    Chr INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS acetylation (
+    Peak TEXT REFERENCES acetylationPeaks(Peak),
+    ProjectID INTEGER REFERENCES projectID(id),
+    value REAL,
+    PRIMARY KEY (Peak, ProjectID)
+);
+
+CREATE TABLE IF NOT EXISTS phenotype (
+    FID TEXT,
+    IID TEXT,
+    projid INTEGER PRIMARY KEY REFERENCES projectID(id),
+    globcog_random_slope REAL,
+    cog_ep_random_slope REAL,
+    parksc_bv REAL,
+    gaitsc_bv REAL,
+    bradysc_bv REAL,
+    rigidsc_bv REAL,
+    tremsc_bv REAL,
+    parksc_lv REAL,
+    gaitsc_lv REAL,
+    bradysc_lv REAL,
+    rigidsc_lv INTEGER,
+    tremsc_lv REAL,
+    cog_ep_lv REAL,
+    globcog_lvi REAL,
+    age_bl REAL,
+    age_death REAL,
+    educ INTEGER,
+    msex INTEGER,
+    apoe_genotype INTEGER,
+    dlbany INTEGER,
+    arteriol_scler INTEGER,
+    ci_num2_gct INTEGER,
+    ci_num2_mct INTEGER,
+    pmAD INTEGER,
+    pathoAD INTEGER,
+    studyn INTEGER,
+    np_sqrt REAL,
+    nft_sqrt REAL,
+    gpath_sqrt REAL,
+    tangles_sqrt REAL,
+    amyloid_sqrt REAL,
+    apoe4n INTEGER,
+    pkyrs_bl REAL,
+    EV1 REAL,
+    EV2 REAL,
+    EV3 REAL,
+    EV4 REAL,
+    EV5 REAL,
+    EV6 REAL,
+    EV7 REAL,
+    EV8 REAL,
+    EV9 REAL,
+    EV10 REAL,
+    aa_av_3 REAL
+);
+
+CREATE TABLE IF NOT EXISTS techvars (
+    mergeid TEXT,
+    projid INTEGER REFERENCES projectID(id),
+    Batch INTEGER,
+    PFReads INTEGER,
+    `BasesAlignedToCoding.Picard.in.reads.` REAL,
+    `PFBasesAlignedToRNaN.Picard.in.reads.` INTEGER,
+    TotalAlignmentByTrinity INTEGER,
+    TotalAlignedReadsByTrinity INTEGER,
+    TotalAlignedReadsByTrinity_log2 REAL,
+    TotalUniqueAlignedReadsByTrinity INTEGER,
+    TotalMultipleMappingReadsByTrinity INTEGER,
+    AvgAdapterPerLane REAL,
+    RINcontinuous REAL,
+    RINordinal INTEGER,
+    RINgood INTEGER,
+    RibosomalBases INTEGER,
+    median_distance_to_all REAL,
+    median_distance_to_exp REAL,
+    removeid INTEGER,
+    pmi REAL,
+    pmi_log2 REAL,
+    age_death REAL,
+    msex INTEGER,
+    EV1 REAL,
+    EV2 REAL,
+    EV3 REAL,
+    EV4 REAL,
+    EV5 REAL,
+    EV6 REAL,
+    EV7 REAL,
+    EV8 REAL,
+    EV9 REAL,
+    EV10 REAL,
+    studyn INTEGER,
+    study TEXT,
+    np_sqrt REAL,
+    nft_sqrt REAL,
+    amyloid_sqrt REAL,
+    tangles_sqrt REAL,
+    pathoAD INTEGER,
+    cAD INTEGER,
+    dlbany INTEGER,
+    globcog_random_slope REAL,
+    ci_num2_gct INTEGER,
+    ci_num2_mct INTEGER,
+    cog_ep_random_slope REAL,
+    cogdx INTEGER,
+    PRIMARY KEY (mergeid, projid)
 );
