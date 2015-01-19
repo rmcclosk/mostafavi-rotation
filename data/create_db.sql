@@ -108,3 +108,12 @@ CREATE TABLE IF NOT EXISTS acetylation (
     value REAL NOT NULL,
     PRIMARY KEY (patient_id, chrom, start, end)
 );
+
+CREATE TABLE IF NOT EXISTS genotype (
+    patient_id INTEGER NOT NULL REFERENCES patient(id),
+    chrom INTEGER NOT NULL REFERENCES chromosome(chrom),
+    position INTEGER NOT NULL,
+    genotype REAL NOT NULL,
+    PRIMARY KEY (patient_id, chrom, position),
+    CHECK (0 <= genotype AND genotype <= 2)
+);
