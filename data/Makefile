@@ -13,7 +13,9 @@ acetylation: chipSeqResiduals.csv.gz peakInfo.csv.gz
 
 phenotype: pheno_cov_n2963_092014_forPLINK.csv techvars_plus_phenotypes26SEP2014.txt
 
-reference: ensGene.txt.gz wgEncodeHaibMethyl450CpgIslandDetails.txt.gz chromInfo.txt.gz ensemblToGeneName.txt.gz
+genotype: combined_core
+
+reference: ensGene.txt.gz wgEncodeHaibMethyl450CpgIslandDetails.txt.gz chromInfo.txt.gz ensemblToGeneName.txt.gz snpArrayAffy6.txt.gz
 
 ill450kMeth_all_740_imputed.txt phenotype_740qc_finalFromLori.txt: 
 	ln -s /broad/dejagerlab/cogdec/datasets/ROSMAP/DNA_Methylation/DNA_Methylation_Brain_DLPFC_450K/frozenDataSet/$@ .
@@ -27,9 +29,12 @@ chipSeqResiduals.csv.gz peakInfo.csv.gz:
 pheno_cov_n2963_092014_forPLINK.csv techvars_plus_phenotypes26SEP2014.txt:
 	ln -s /home/unix/mostafav/projects/cogdec_mnet/phenotype_data/$@ .
 
-ensGene.txt.gz chromInfo.txt.gz ensemblToGeneName.txt.gz:
+ensGene.txt.gz chromInfo.txt.gz ensemblToGeneName.txt.gz snpArrayAffy6.txt.gz:
 	wget ftp://hgdownload.cse.ucsc.edu/goldenPath/currentGenomes/Homo_sapiens/database/$@
 
 wgEncodeHaibMethyl450CpgIslandDetails.txt.gz:
 	wget ftp://hgdownload.cse.ucsc.edu/goldenPath/currentGenomes/Homo_sapiens/encodeDCC/wgEncodeHaibMethyl450/supplemental/$(patsubst %.gz,%,$@)
 	gzip $(patsubst %.gz,%,$@)
+
+combined_core:
+	ln -s /broad/dejagerlab/cogdec/datasets/ROSMAP/imputation_20101123/output/$@ .
