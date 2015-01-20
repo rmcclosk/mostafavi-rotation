@@ -1,41 +1,37 @@
-PRAGMA foreign_keys = ON;
-
-CREATE TABLE IF NOT EXISTS chromosome (
-    chrom INTEGER NOT NULL PRIMARY KEY,
+CREATE TABLE chromosome (
+    chrom SMALLINT NOT NULL PRIMARY KEY,
     size INTEGER NOT NULL,
     CHECK (chrom >= 1 AND chrom <= 22)
 );
 
-CREATE TABLE IF NOT EXISTS gene (
-    id TEXT NOT NULL PRIMARY KEY,
-    name TEXT NOT NULL,
-    chrom INTEGER NOT NULL REFERENCES chromosome(chrom),
-    forward INTEGER NOT NULL,
+CREATE TABLE gene (
+    id VARCHAR(16) NOT NULL PRIMARY KEY,
+    name VARCHAR(32) NOT NULL,
+    chrom SMALLINT NOT NULL REFERENCES chromosome(chrom),
+    forward BOOLEAN NOT NULL,
     cds_start INTEGER,
-    cds_end INTEGER,
-    CHECK (forward IN (0, 1))
+    cds_end INTEGER
 );
 
-CREATE TABLE IF NOT EXISTS transcript (
-    id TEXT NOT NULL PRIMARY KEY,
-    gene_id TEXT NOT NULL REFERENCES gene(id)
+CREATE TABLE transcript (
+    id VARCHAR(16) NOT NULL PRIMARY KEY,
+    gene_id VARCHAR(16) NOT NULL REFERENCES gene(id)
 );
 
-CREATE TABLE IF NOT EXISTS exon (
-    transcript_id TEXT NOT NULL REFERENCES transcript(id),
-    start INTEGER NOT NULL,
-    end INTEGER NOT NULL
+CREATE TABLE exon (
+    transcript_id VARCHAR(16) NOT NULL REFERENCES transcript(id),
+    exon_start INTEGER NOT NULL,
+    exon_end INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS cpg (
-    id TEXT NOT NULL PRIMARY KEY,
-    chrom INTEGER NOT NULL REFERENCES chromosome(chrom),
+CREATE TABLE cpg (
+    id VARCHAR(16) NOT NULL PRIMARY KEY,
+    chrom SMALLINT NOT NULL REFERENCES chromosome(chrom),
     position INTEGER NOT NULL,
-    forward INTEGER NOT NULL,
-    CHECK (forward IN (0, 1))
+    forward BOOLEAN NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS patient (
+CREATE TABLE patient (
     id INTEGER NOT NULL PRIMARY KEY,
     globcog_random_slope REAL,
     cog_ep_random_slope REAL,
@@ -54,14 +50,14 @@ CREATE TABLE IF NOT EXISTS patient (
     age_bl REAL,
     age_death REAL,
     educ INTEGER,
-    msex INTEGER NOT NULL,
+    msex BOOLEAN,
     apoe_genotype INTEGER,
     dlbany INTEGER,
     arteriol_scler INTEGER,
     ci_num2_gct INTEGER,
     ci_num2_mct INTEGER,
-    pmAD INTEGER,
-    pathoAD INTEGER,
+    pmAD BOOLEAN,
+    pathoAD BOOLEAN,
     studyn INTEGER,
     np_sqrt REAL,
     nft_sqrt REAL,
@@ -81,39 +77,45 @@ CREATE TABLE IF NOT EXISTS patient (
     EV9 REAL,
     EV10 REAL,
     aa_av_3 REAL
-    CHECK (msex IN (0, 1)),
-    CHECK (pmAD IS NULL or pmAD IN (0, 1)),
-    CHECK (pathoAD IS NULL OR pathoAD IN (0, 1))
 );
 
-CREATE TABLE IF NOT EXISTS methylation (
+CREATE TABLE methylation (
     patient_id INTEGER NOT NULL REFERENCES patient(id),
-    cpg_id TEXT NOT NULL REFERENCES cpg(id),
+    cpg_id VARCHAR(16) NOT NULL REFERENCES cpg(id),
     value REAL NOT NULL,
     PRIMARY KEY (patient_id, cpg_id)
 );
 
-CREATE TABLE IF NOT EXISTS expression (
+CREATE TABLE expression (
     patient_id INTEGER NOT NULL REFERENCES patient(id),
-    gene_id TEXT NOT NULL REFERENCES gene(id),
+    gene_id VARCHAR(16) NOT NULL REFERENCES gene(id),
     value REAL NOT NULL,
     PRIMARY KEY (patient_id, gene_id)
 );
 
-CREATE TABLE IF NOT EXISTS acetylation (
+CREATE TABLE acetylation (
     patient_id INTEGER NOT NULL REFERENCES patient(id),
     chrom INTEGER NOT NULL REFERENCES chromosome(chrom),
-    start INTEGER NOT NULL,
-    end INTEGER NOT NULL,
+    peak_start INTEGER NOT NULL,
+    peak_end INTEGER NOT NULL,
     value REAL NOT NULL,
-    PRIMARY KEY (patient_id, chrom, start, end)
+    PRIMARY KEY (patient_id, chrom, peak_start, peak_end)
 );
 
-CREATE TABLE IF NOT EXISTS genotype (
-    patient_id INTEGER NOT NULL REFERENCES patient(id),
+CREATE TABLE snp (
+    rsid VARCHAR(16) NOT NULL PRIMARY KEY,
     chrom INTEGER NOT NULL REFERENCES chromosome(chrom),
     position INTEGER NOT NULL,
+    forward BOOLEAN NOT NULL,
+    ref CHAR(1) NOT NULL,
+    alt CHAR(1) NOT NULL,
+    CHECK (ref IN ('A', 'C', 'G', 'T') AND alt IN ('A', 'C', 'G', 'T'))
+);
+
+CREATE TABLE genotype (
+    patient_id INTEGER NOT NULL REFERENCES patient(id),
+    rsid VARCHAR(16) NOT NULL REFERENCES snp(rsid),
     genotype REAL NOT NULL,
-    PRIMARY KEY (patient_id, chrom, position),
+    PRIMARY KEY (patient_id, rsid),
     CHECK (0 <= genotype AND genotype <= 2)
 );
