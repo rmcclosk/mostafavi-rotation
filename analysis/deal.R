@@ -32,7 +32,8 @@ all.nets <- networkfamily(data, net, prior)
 all.nets <- nwfsort(all.nets$nw)
 best.nets <- all.nets[sapply(all.nets, "[[", "relscore") == 1]
 
-png("deal.png")
+png("deal.png", width=960, height=480)
+par(mfrow=c(1, 2), mar=c(0, 0, 0, 0))
 sapply(best.nets, plot)
 dev.off()
 
