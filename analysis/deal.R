@@ -1,7 +1,11 @@
 #!/usr/bin/env Rscript
 
+# Bayesian network on phenotypes with the deal package.
+
 library(RSQLite)
 library(deal)
+
+set.seed(0)
 
 con <- dbConnect(SQLite(), "../data/db-pheno.sqlite")
 
@@ -28,7 +32,7 @@ all.nets <- networkfamily(data, net, prior)
 all.nets <- nwfsort(all.nets$nw)
 best.nets <- all.nets[sapply(all.nets, "[[", "relscore") == 1]
 
-pdf("deal.pdf")
+png("deal.png")
 sapply(best.nets, plot)
 dev.off()
 
