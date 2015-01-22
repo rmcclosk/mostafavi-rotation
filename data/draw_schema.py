@@ -13,6 +13,9 @@ end_ptn = re.compile("[)];")
 
 print("digraph db {")
 print('\tgraph [rankdir="LR"];')
+print("\tsplines=true;")
+print("\toverlap=portho;")
+print("\tmodel=subset;")
 edges = []
 for line in sys.stdin:
     match = create_ptn.search(line)
@@ -32,11 +35,13 @@ for line in sys.stdin:
         continue
 
     if end_ptn.search(line):
-        label = ["<table> {}".format(table)]
-        for i, f in enumerate(fields, start=1):
-            label.append("<{}> {}".format(f, f))
-        label = " | ".join(label)
-        print('\t"{}" [label="{}", shape="record"];'.format(table, label))
+        label = ['<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">']
+        label.append('<TR><TD BGCOLOR="lightsteelblue" PORT="table"><B>{}</B></TD></TR>'.format(table))
+        for f in fields:
+            label.append('<TR><TD PORT="{}">{}</TD></TR>'.format(f, f))
+        label.append('</TABLE>>')
+        label = "".join(label)
+        print('\t"{}" [label={}, shape="none"];'.format(table, label))
 
 for e in edges:
     print('\t"{}":{} -> "{}":{};'.format(*e))
