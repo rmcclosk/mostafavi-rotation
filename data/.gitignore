@@ -10,3 +10,7 @@ pheno_cov_n2963_092014_forPLINK.csv
 residual_gene_expression_expressed_genes_2FPKM100ind.txt
 techvars_plus_phenotypes26SEP2014.txt
 db.sqlite
+combined_core
+schema.dot
+db.sqlite-journal
+db/*.timestamp

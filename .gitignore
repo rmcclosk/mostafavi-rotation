@@ -3,3 +3,5 @@
 *.gz
 *.pdf
 *.gv
+nohup.out
+__pycache__
