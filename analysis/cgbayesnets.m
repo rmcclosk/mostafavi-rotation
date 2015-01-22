@@ -6,7 +6,7 @@ bnpathscript;
 tic;
 cd(curdir);
 
-fname = 'cgbayesnet_data.csv';
+fname = tempname;
 vars = {'tangles_sqrt', 'amyloid_sqrt', 'globcog_random_slope', 'pathoAD', 'pmAD'};
 
 query = ['SELECT ', strjoin(vars, ', '), ' FROM patient WHERE ', ...
@@ -25,6 +25,11 @@ priorPrecision.alpha = 10;
 priorPrecision.maxParents = 3;
 
 [data, cols] = RCSVLoad(fname, false, ',');
-MBNet = LearnStructure(data, cols, 'pathoAD', priorPrecision, 'pheno-net');
-MBNet.nodes.self
-MBNet.adjmat
+FullBNet = FullBNLearn(data, cols, 'pmAD', 0, 'pmAD', priorPrecision);
+GVOutputBayesNet(FullBNet, 'cgbayesnets.gv');
+
+% gives the same result
+%FullBNet = FullBNLearn(data, cols, 'pathoAD', 0, 'pathoAD', priorPrecision);
+%GVOutputBayesNet(FullBNet, 'pathoAD.gv');
+
+delete(fname);
