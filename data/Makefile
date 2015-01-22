@@ -1,21 +1,31 @@
-all: db.sqlite
+DB=db.sqlite
+DBDIR=db
+TABLES=chromosome patient gene cpg snp methylation expression acetylation genotype
 
-db.sqlite: import.py create_db.sql methylation expression acetylation phenotype reference
-	rm -f $@
-	sqlite3 $@ < create_db.sql
-	./import.py
+all: $(DB) schema.png
 
-methylation: ill450kMeth_all_740_imputed.txt phenotype_740qc_finalFromLori.txt
+schema.png: schema.dot
+	dot -Tpng $^ > $@
 
-expression: residual_gene_expression_expressed_genes_2FPKM100ind.txt IDmapping.txt
+schema.dot: draw_schema.py $(patsubst %,$(DBDIR)/%.sql,$(TABLES))
+	cat $(wordlist 2,$(words $^),$^) | ./$(firstword $^) > $@
 
-acetylation: chipSeqResiduals.csv.gz peakInfo.csv.gz
+$(DB): $(patsubst %,$(DBDIR)/%.timestamp,$(TABLES))
 
-phenotype: pheno_cov_n2963_092014_forPLINK.csv techvars_plus_phenotypes26SEP2014.txt
+$(DBDIR)/chromosome.timestamp: chromInfo.txt.gz
+$(DBDIR)/patient.timestamp: pheno_cov_n2963_092014_forPLINK.csv techvars_plus_phenotypes26SEP2014.txt
+$(DBDIR)/gene.timestamp: ensGene.txt.gz ensemblToGeneName.txt.gz
+$(DBDIR)/cpg.timestamp: wgEncodeHaibMethyl450CpgIslandDetails.txt.gz
+$(DBDIR)/snp.timestamp: snp141Common.txt.gz
+$(DBDIR)/methylation.timestamp: ill450kMeth_all_740_imputed.txt phenotype_740qc_finalFromLori.txt
+$(DBDIR)/expression.timestamp: residual_gene_expression_expressed_genes_2FPKM100ind.txt IDmapping.txt
+$(DBDIR)/acetylation.timestamp: chipSeqResiduals.csv.gz peakInfo.csv.gz 
+$(DBDIR)/genotype.timestamp: combined_core
 
-genotype: combined_core
-
-reference: ensGene.txt.gz wgEncodeHaibMethyl450CpgIslandDetails.txt.gz chromInfo.txt.gz ensemblToGeneName.txt.gz snpArrayAffy6.txt.gz
+%.timestamp: %.py %.sql
+	sqlite3 $(DB) < $(word 2,$^)
+	./$(word 1,$^)
+	date > $@
 
 ill450kMeth_all_740_imputed.txt phenotype_740qc_finalFromLori.txt: 
 	ln -s /broad/dejagerlab/cogdec/datasets/ROSMAP/DNA_Methylation/DNA_Methylation_Brain_DLPFC_450K/frozenDataSet/$@ .
@@ -29,8 +39,11 @@ chipSeqResiduals.csv.gz peakInfo.csv.gz:
 pheno_cov_n2963_092014_forPLINK.csv techvars_plus_phenotypes26SEP2014.txt:
 	ln -s /home/unix/mostafav/projects/cogdec_mnet/phenotype_data/$@ .
 
-ensGene.txt.gz chromInfo.txt.gz ensemblToGeneName.txt.gz snpArrayAffy6.txt.gz:
+ensGene.txt.gz chromInfo.txt.gz ensemblToGeneName.txt.gz snp141Common.txt.gz:
 	wget ftp://hgdownload.cse.ucsc.edu/goldenPath/currentGenomes/Homo_sapiens/database/$@
+
+SNPChrPosOnRef.bcp.gz:
+	wget -O $@ -nd -r -A '*_$(patsubst %.bcp.gz,%,$@)_*.bcp.gz' ftp://ftp.ncbi.nih.gov/snp/database/organism_data/human_9606/
 
 wgEncodeHaibMethyl450CpgIslandDetails.txt.gz:
 	wget ftp://hgdownload.cse.ucsc.edu/goldenPath/currentGenomes/Homo_sapiens/encodeDCC/wgEncodeHaibMethyl450/supplemental/$(patsubst %.gz,%,$@)
