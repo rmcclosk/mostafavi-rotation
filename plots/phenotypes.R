@@ -10,7 +10,7 @@ vars <- c("tangles_sqrt",
           "pathoAD", 
           "pmAD")
 
-con <- dbConnect(SQLite(), "../data/db.sqlite")
+con <- dbConnect(SQLite(), "../data/db-pheno.sqlite")
 query <- paste("SELECT", paste(vars, collapse=","), "FROM patient")
 res <- dbSendQuery(con, query)
 data <- dbFetch(res)
@@ -20,9 +20,12 @@ data <- dbFetch(res)
 data$pathoAD <- factor(data$pathoAD)
 data$pmAD <- factor(data$pmAD)
 
-pdf("phenotypes.pdf")
+pdf("phenotypes.png")
 ggpairs(na.omit(data))
-ggplot(data, aes(x=tangles_sqrt)) + geom_density()
-ggplot(data, aes(x=amyloid_sqrt)) + geom_density()
-ggplot(data, aes(x=globcog_random_slope)) + geom_density()
 dev.off()
+
+. <- sapply(vars[1:3], function (v) {
+    png(sprintf("phenotypes/%s.png", v))
+    print(ggplot(data, aes_string(x=v)) + geom_density())
+    dev.off()
+})
