@@ -12,10 +12,11 @@ def main():
     query = make_insert_query("chromosome", 2)
     for row in iter_gzip("chromInfo.txt.gz"):
         try:
-            row[0] = int(row[0].replace("chr", ""))
-            cur.execute(query, row[:2])
+            chrom = int(row[0].replace("chr", ""))
         except ValueError:
             continue
+        size = int(row[1])
+        cur.execute(query, (chrom, size))
     con.commit()
     con.close()
 

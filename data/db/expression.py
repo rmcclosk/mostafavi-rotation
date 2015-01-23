@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sqlite3
+import psycopg2
 import csv
 import logging
 import logging.config
@@ -10,20 +10,21 @@ def main():
     logging.config.fileConfig("../logging.conf")
     cur, con = db_connect()
     logging.info("Importing expression data")
-    query = make_insert_query("expression", 3)
+    query = "INSERT INTO expression (patient_id, gene_id, value) VALUES (%s,%s,%s)"
+    values = []
     with open("residual_gene_expression_expressed_genes_2FPKM100ind.txt") as f:
         reader = csv.DictReader(f, delimiter="\t")
         for i, row in enumerate(reader, start=1):
             patient_id = row.pop("").split(":")[0]
             for gene, value in row.items():
                 gene_id = gene.split(":")[1].split(".")[0]
-                try:
-                    cur.execute(query, (patient_id, gene_id, value))
-                except sqlite3.IntegrityError:
-                    continue
-            if i % 10000 == 0:
+                values.append((patient_id, gene_id, value))
+            if i % 100 == 0:
                 logging.info("Done {} rows".format(i))
+                cur.executemany(query, values)
                 con.commit()
+                values = []
+        cur.executemany(query, values)
         con.commit()
     con.close()
 

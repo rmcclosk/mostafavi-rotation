@@ -10,6 +10,7 @@ def main():
     logging.info("Importing CpGs")
     query = make_insert_query("cpg", 4)
 
+    values = []
     r = iter_gzip("wgEncodeHaibMethyl450CpgIslandDetails.txt.gz", ",", 8)
     for i, row in enumerate(r, start=1):
         id = row[0]
@@ -21,11 +22,11 @@ def main():
             continue
 
         pos = row[12]
-        forward = 0 if row[16] == "F" else 1
-        cur.execute(query, (id, chrom, pos, forward))
-        if i % 10000 == 0:
-            logging.info("Done {} rows".format(i))
-            con.commit()
+        forward = row[16] == "F"
+        values.append((id, chrom, pos, forward))
+
+    logging.info("Inserting {} CpGs".format(len(values)))
+    cur.executemany(query, values)
     con.commit()
     con.close()
 

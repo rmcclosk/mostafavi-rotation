@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sqlite3
+import psycopg2
 import logging
 import logging.config
 from _shared import *
@@ -23,7 +23,7 @@ def main():
         for j, value in enumerate(row):
             try:
                 cur.execute(query, (header[j], chr, start, end, value))
-            except sqlite3.IntegrityError:
+            except psycopg2.IntegrityError:
                 continue
         if i % 10000 == 0:
             logging.info("Done {} rows".format(i))

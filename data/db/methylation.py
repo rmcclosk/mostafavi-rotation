@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import csv
-import sqlite3
+import psycopg2
 import logging
 import logging.config
 from _shared import *
@@ -25,7 +25,7 @@ def main():
             for sample, value in row.items():
                 try:
                     cur.execute(query, (ids[sample], target, value))
-                except sqlite3.IntegrityError:
+                except psycopg2.IntegrityError:
                     continue
             if i % 1000 == 0:
                 logging.info("Done {} rows".format(i))

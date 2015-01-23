@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS chromosome;
+DROP TABLE IF EXISTS chromosome CASCADE;
 CREATE TABLE chromosome (
-    chrom INTEGER NOT NULL PRIMARY KEY,
+    chrom SMALLINT NOT NULL PRIMARY KEY,
     size INTEGER NOT NULL,
     CHECK (chrom >= 1 AND chrom <= 22)
 );

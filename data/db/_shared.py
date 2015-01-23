@@ -1,15 +1,14 @@
 import gzip
 import codecs
 import csv
-import sqlite3
+import psycopg2
 import logging
 import logging.config
 
-def make_insert_query(table, ncols, ignore=True):
+def make_insert_query(table, ncols):
     """Create a generic INSERT query for a table"""
-    space = "OR IGNORE" if ignore else ""
-    ph = ",".join("?"*ncols)
-    return "INSERT {} INTO {} VALUES ({})".format(space, table, ph)
+    placeholder = ",".join(["%s" for i in range(ncols)])
+    return "INSERT INTO {} VALUES ({})".format(table, placeholder)
 
 def fix_nulls(row):
     """Change all NULL-meaning values to None"""
@@ -32,8 +31,6 @@ def iter_gzip(fn, delim="\t", skip=0):
 
 def db_connect():
     logging.info("Connecting to database")
-    con = sqlite3.connect("db.sqlite")
+    con = psycopg2.connect("dbname=cogdec user=rmcclosk")
     cur = con.cursor()
-    cur.execute("PRAGMA foreign_keys = ON")
-    con.commit()
     return (cur, con)

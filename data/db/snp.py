@@ -9,24 +9,32 @@ def main():
     cur, con = db_connect()
     logging.info("Importing SNPs")
     query = make_insert_query("snp", 6)
+    values = []
+    nt = ['A', 'C', 'G', 'T']
     for i, row in enumerate(iter_gzip("snp141Common.txt.gz"), start=1):
         if i % 10000 == 0:
             logging.info("Done {} rows".format(i))
+            cur.executemany(query, values)
             con.commit()
+            values = []
+
         try:
             chrom = int(row[1].replace("chr", ""))
         except ValueError:
             continue
-        if row[2] != row[3]: continue # indel
         try:
             ref, alt = row[9].split("/")
         except ValueError:
             continue
+        if not (ref in nt and alt in nt): continue
 
         rsid = row[4]
         pos = row[2]
-        forward = 1 if row[6] == "+" else 0
-        cur.execute(query, (rsid, chrom, pos, forward, ref, alt))
+        forward = row[6] == "+"
+        values.append((rsid, chrom, pos, forward, ref, alt))
+
+    logging.info("Importing {} SNPs".format(len(values)))
+    cur.executemany(query, values)
     con.commit()
     con.close()
 
