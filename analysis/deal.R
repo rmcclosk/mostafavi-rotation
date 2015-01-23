@@ -9,18 +9,11 @@ set.seed(0)
 
 con <- dbConnect(SQLite(), "../data/db-pheno.sqlite")
 
-do.select <- function (con, query) {
-    res <- dbSendQuery(con, query)
-    data <- dbFetch(res)
-    dbClearResult(res)
-    data
-}
-
 vars <- c("tangles_sqrt", "amyloid_sqrt", "globcog_random_slope", "pathoAD",
           "pmAD")
-query <- paste("SELECT", paste(vars, collapse=", "), "FROM patient")
-data <- do.select(con, query)
-data <- na.omit(data)
+query <- paste("SELECT", paste(vars, collapse=", "), "FROM patient WHERE",
+               paste(vars, collapse=" IS NOT NULL AND "), "IS NOT NULL")
+data <- dbGetQuery(con, query)
 data$pathoAD <- factor(data$pathoAD)
 data$pmAD <- factor(data$pmAD)
 
