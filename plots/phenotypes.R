@@ -11,17 +11,16 @@ vars <- c("tangles_sqrt",
           "pmAD")
 
 con <- dbConnect(SQLite(), "../data/db-pheno.sqlite")
-query <- paste("SELECT", paste(vars, collapse=","), "FROM patient")
-res <- dbSendQuery(con, query)
-data <- dbFetch(res)
-. <- dbClearResult(res)
+query <- paste("SELECT", paste(vars, collapse=", "), "FROM patient WHERE",
+               paste(vars, collapse=" IS NOT NULL AND "), "IS NOT NULL")
+data <- dbGetQuery(con, query)
 . <- dbDisconnect(con)
 
 data$pathoAD <- factor(data$pathoAD)
 data$pmAD <- factor(data$pmAD)
 
-pdf("phenotypes.png")
-ggpairs(na.omit(data))
+png("phenotypes.png")
+ggpairs(data)
 dev.off()
 
 . <- sapply(vars[1:3], function (v) {
