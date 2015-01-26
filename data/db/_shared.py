@@ -4,6 +4,9 @@ import csv
 import psycopg2
 import logging
 import logging.config
+import tempfile
+
+DBINFO="dbname=cogdec user=rmcclosk"
 
 def make_insert_query(table, ncols):
     """Create a generic INSERT query for a table"""
@@ -14,8 +17,8 @@ def fix_nulls(row):
     """Change all NULL-meaning values to None"""
     new_row = []
     for x in row:
-        if x == "" or x == "NA" or x == "NaN" or x == "-9": # danger if real -9
-            new_row.append(None)
+        if x is None or x == "" or x == "NA" or x == "NaN" or x == "-9": # danger if real -9
+            new_row.append("\\N")
         else:
             new_row.append(x)
     return(new_row)
