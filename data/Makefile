@@ -1,8 +1,8 @@
 DB=db.sqlite
 DBDIR=db
-TABLES=chromosome patient gene cpg snp methylation expression acetylation genotype
+TABLES=chromosome patient gene 
 
-all: $(DB) schema.png
+all: $(DB) 
 
 schema.png: schema.dot
 	dot -Tpng $^ > $@
@@ -14,17 +14,18 @@ $(DB): $(patsubst %,$(DBDIR)/%.timestamp,$(TABLES))
 
 $(DBDIR)/chromosome.timestamp: chromInfo.txt.gz
 $(DBDIR)/patient.timestamp: pheno_cov_n2963_092014_forPLINK.csv techvars_plus_phenotypes26SEP2014.txt
-$(DBDIR)/gene.timestamp: ensGene.txt.gz ensemblToGeneName.txt.gz
+$(DBDIR)/gene.timestamp: ensemblGenes.txt.gz
+$(DBDIR)/snp.timestamp: SNPChrPosOnRef.bcp.gz
 $(DBDIR)/cpg.timestamp: wgEncodeHaibMethyl450CpgIslandDetails.txt.gz
-$(DBDIR)/snp.timestamp: snp141Common.txt.gz
 $(DBDIR)/methylation.timestamp: ill450kMeth_all_740_imputed.txt phenotype_740qc_finalFromLori.txt
 $(DBDIR)/expression.timestamp: residual_gene_expression_expressed_genes_2FPKM100ind.txt IDmapping.txt
 $(DBDIR)/acetylation.timestamp: chipSeqResiduals.csv.gz peakInfo.csv.gz 
 $(DBDIR)/genotype.timestamp: combined_core
 
 %.timestamp: %.py %.sql
+	mkfifo $(patsubst %.timestamp,%.tsv,$@)
+	./$(word 1,$^) > $(patsubst %.timestamp,%.tsv,$@) &
 	sqlite3 $(DB) < $(word 2,$^)
-	./$(word 1,$^)
 	date > $@
 
 ill450kMeth_all_740_imputed.txt phenotype_740qc_finalFromLori.txt: 
@@ -39,8 +40,9 @@ chipSeqResiduals.csv.gz peakInfo.csv.gz:
 pheno_cov_n2963_092014_forPLINK.csv techvars_plus_phenotypes26SEP2014.txt:
 	ln -s /home/unix/mostafav/projects/cogdec_mnet/phenotype_data/$@ .
 
-ensGene.txt.gz chromInfo.txt.gz ensemblToGeneName.txt.gz snp141Common.txt.gz:
-	wget ftp://hgdownload.cse.ucsc.edu/goldenPath/currentGenomes/Homo_sapiens/database/$@
+ensemblGenes.txt.gz:
+	./genes.pl > $(patsubst %.gz,%,$@)
+	gzip $(patsubst %.gz,%,$@)
 
 SNPChrPosOnRef.bcp.gz:
 	wget -O $@ -nd -r -A '*_$(patsubst %.bcp.gz,%,$@)_*.bcp.gz' ftp://ftp.ncbi.nih.gov/snp/database/organism_data/human_9606/
