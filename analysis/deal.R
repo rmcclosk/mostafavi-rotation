@@ -5,6 +5,12 @@
 library(RSQLite)
 library(deal)
 
+nice.dim <- function (n) {
+    w <- round(sqrt(n))
+    while (n %% w != 0) w <- w+1
+    w
+}
+
 set.seed(0)
 
 con <- dbConnect(SQLite(), "../data/db-pheno.sqlite")
@@ -16,6 +22,8 @@ query <- paste("SELECT", paste(vars, collapse=", "), "FROM patient WHERE",
 data <- dbGetQuery(con, query)
 data$pathoAD <- factor(data$pathoAD)
 data$pmAD <- factor(data$pmAD)
+. <- dbDisconnect(con)
+nrow(data)
 
 # mixed continuous and discrete, exhaustive search
 net <- network(data)
@@ -23,11 +31,16 @@ prior <- jointprior(net)
 net <- learn(net, data, prior)$nw
 all.nets <- networkfamily(data, net, prior)
 all.nets <- nwfsort(all.nets$nw)
-best.nets <- all.nets[sapply(all.nets, "[[", "relscore") == 1]
 
-png("deal.png", width=960, height=480)
-par(mfrow=c(1, 2), mar=c(0, 0, 0, 0))
+scores <- sapply(all.nets, "[[", "score")
+relscores <- sapply(all.nets, "[[", "relscore")
+best.nets <- all.nets[sapply(relscores, all.equal, 1) == "TRUE"]
+head(cbind(scores, relscores))
+
+w <- nice.dim(length(best.nets))
+h <- length(best.nets)/w
+
+png("deal.png", width=480*w, height=480*h)
+par(mfrow=c(w, h), mar=c(0, 0, 0, 0))
 sapply(best.nets, plot)
 dev.off()
-
-. <- dbDisconnect(con)
