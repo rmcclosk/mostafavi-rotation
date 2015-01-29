@@ -1,7 +1,21 @@
-DROP TABLE IF EXISTS expression;
+DROP TABLE IF EXISTS expression CASCADE;
+
+-- main table
 CREATE TABLE expression (
-    patient_id INTEGER NOT NULL REFERENCES patient(id),
-    gene_id TEXT NOT NULL REFERENCES gene(id),
-    value REAL NOT NULL,
-    PRIMARY KEY (patient_id, gene_id)
+    patient_id INTEGER NOT NULL,
+    gene_id INTEGER NOT NULL,
+    value REAL NOT NULL
 );
+
+-- load data
+COPY expression FROM '../db/expression.tsv';
+
+-- keys
+ALTER TABLE expression ADD CONSTRAINT fk_expression_patient FOREIGN KEY (patient_id) REFERENCES patient(id);
+ALTER TABLE expression ADD CONSTRAINT fk_expression_gene FOREIGN KEY (gene_id) REFERENCES gene(id);
+
+-- indices
+CREATE INDEX idx_expression ON expression (patient_id, gene_id);
+
+-- analyse
+ANALYZE expression;

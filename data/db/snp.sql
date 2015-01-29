@@ -1,15 +1,21 @@
-DROP TABLE IF EXISTS snp;
-DROP INDEX IF EXISTS idx_snp_chrom_position;
+DROP TABLE IF EXISTS snp CASCADE;
 
+-- main table
 CREATE TABLE snp (
-    rsid TEXT NOT NULL PRIMARY KEY,
-    chrom INTEGER NOT NULL REFERENCES chromosome(chrom),
-    position INTEGER NOT NULL,
-    forward INTEGER NOT NULL,
-    ref TEXT NOT NULL,
-    alt TEXT NOT NULL,
-    CHECK (ref IN ('A', 'C', 'G', 'T') AND alt IN ('A', 'C', 'G', 'T')),
-    CHECK (forward IN (0, 1))
+    rsid INTEGER NOT NULL,
+    chrom SMALLINT NOT NULL,
+    position INTEGER NOT NULL
 );
 
-CREATE INDEX idx_snp_chrom_position ON snp (chrom, position);
+-- load data
+COPY snp FROM '../db/snp.tsv';
+
+-- keys
+ALTER TABLE snp ADD CONSTRAINT pk_snp PRIMARY KEY (rsid);
+ALTER TABLE snp ADD CONSTRAINT fk_snp_chrom FOREIGN KEY (chrom) REFERENCES chromosome (chrom);
+
+-- index
+CREATE INDEX idx_snp_chrom_position ON snp(chrom, position);
+
+-- analyze
+ANALYZE snp;

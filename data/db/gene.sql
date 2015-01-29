@@ -1,24 +1,23 @@
-DROP TABLE IF EXISTS gene;
-DROP TABLE IF EXISTS transcript;
-DROP TABLE IF EXISTS exon;
+DROP TABLE IF EXISTS gene CASCADE;
 
+-- main table
 CREATE TABLE gene (
-    id TEXT NOT NULL PRIMARY KEY,
-    name TEXT NOT NULL,
-    chrom INTEGER NOT NULL REFERENCES chromosome(chrom),
-    forward INTEGER NOT NULL,
-    cds_start INTEGER,
-    cds_end INTEGER,
-    CHECK (forward IN (0, 1))
+    id INTEGER NOT NULL,
+    name VARCHAR(36) NOT NULL,
+    chrom SMALLINT NOT NULL,
+    gene_start INTEGER NOT NULL,
+    gene_end INTEGER NOT NULL,
+    forward BOOLEAN NOT NULL
 );
 
-CREATE TABLE transcript (
-    id TEXT NOT NULL PRIMARY KEY,
-    gene_id TEXT NOT NULL REFERENCES gene(id)
-);
+-- load data
+COPY gene FROM '../db/gene.tsv';
 
-CREATE TABLE exon (
-    transcript_id TEXT NOT NULL REFERENCES transcript(id),
-    exon_start INTEGER NOT NULL,
-    exon_end INTEGER NOT NULL
-);
+-- keys
+ALTER TABLE gene ADD CONSTRAINT pk_gene PRIMARY KEY (id);
+ALTER TABLE gene ADD CONSTRAINT fk_gene_chrom FOREIGN KEY (chrom) REFERENCES chromosome (chrom);
+
+-- views
+CREATE VIEW tss (gene_id, tss) AS 
+SELECT id, CASE WHEN forward THEN gene_start ELSE gene_end END
+FROM gene;

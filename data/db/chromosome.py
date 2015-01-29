@@ -1,23 +1,18 @@
 #!/usr/bin/env python3
 
-import logging
-import logging.config
-from _shared import *
+import sys
+import csv
+from _shared import iter_gzip
 
 def main():
-    cur, con = db_connect()
-    logging.config.fileConfig("../logging.conf")
-    logging.info("Importing chromosome information")
-
-    query = make_insert_query("chromosome", 2)
+    writer = csv.writer(sys.stdout, delimiter="\t")
     for row in iter_gzip("chromInfo.txt.gz"):
         try:
-            row[0] = int(row[0].replace("chr", ""))
-            cur.execute(query, row[:2])
+            chrom = int(row[0].replace("chr", ""))
         except ValueError:
             continue
-    con.commit()
-    con.close()
+        size = int(row[1])
+        writer.writerow((chrom, size))
 
 if __name__ == "__main__":
     main()
