@@ -20,8 +20,9 @@ end
 for i = 1:length(BN.adjmat)
     for j = 1:length(BN.adjmat)
         if (BN.adjmat(i,j))
-            fprintf(fid,'\tedge [weight=%f] %s -> %s;\n', ...
-                    full(BN.weightMatrix(i,j)), BN.cols{i}, BN.cols{j});
+            %fprintf(fid,'\tedge [weight=%f] %s -> %s;\n', ...
+            %        full(BN.weightMatrix(i,j)), BN.cols{i}, BN.cols{j});
+            fprintf(fid,'\t%s -> %s;\n', BN.cols{i}, BN.cols{j});
         end
     end
 end
