@@ -1,9 +1,0 @@
-DROP TABLE IF EXISTS snp;
-CREATE TABLE snp (
-    rsid VARCHAR(15) NOT NULL PRIMARY KEY,
-    chrom SMALLINT NOT NULL,
-    position INTEGER NOT NULL,
-    forward BOOLEAN NOT NULL,
-    ref CHAR(1) NOT NULL,
-    alt CHAR(1) NOT NULL
-);

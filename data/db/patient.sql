@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS patient CASCADE;
 
 CREATE TABLE patient (
+    alt_id VARCHAR(16) NOT NULL,
     id INTEGER NOT NULL PRIMARY KEY,
     globcog_random_slope REAL,
     cog_ep_random_slope REAL,

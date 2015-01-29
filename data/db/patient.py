@@ -11,7 +11,7 @@ def main():
         header = next(reader) # skip header
         for row in reader:
             for i in range(len(header))[::-1]:
-                if header[i] in ["", "FID", "IID"]:
+                if header[i] in ["", "FID"]:
                     row.pop(i)
                 elif header[i].endswith("sqrt") and row[i] != "" and float(row[i]) == 0:
                     row[i] = None
