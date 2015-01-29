@@ -1,0 +1,31 @@
+digraph db {
+	graph [rankdir="LR"];
+	splines=true;
+	overlap=portho;
+	model=subset;
+	"chromosome" [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0"><TR><TD BGCOLOR="lightsteelblue" PORT="table"><B>chromosome</B></TD></TR><TR><TD PORT="chrom">chrom</TD></TR><TR><TD PORT="size">size</TD></TR></TABLE>>, shape="none"];
+	"patient" [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0"><TR><TD BGCOLOR="lightsteelblue" PORT="table"><B>patient</B></TD></TR><TR><TD PORT="id">id</TD></TR><TR><TD PORT="globcog_random_slope">globcog_random_slope</TD></TR><TR><TD PORT="cog_ep_random_slope">cog_ep_random_slope</TD></TR><TR><TD PORT="parksc_bv">parksc_bv</TD></TR><TR><TD PORT="gaitsc_bv">gaitsc_bv</TD></TR><TR><TD PORT="bradysc_bv">bradysc_bv</TD></TR><TR><TD PORT="rigidsc_bv">rigidsc_bv</TD></TR><TR><TD PORT="tremsc_bv">tremsc_bv</TD></TR><TR><TD PORT="parksc_lv">parksc_lv</TD></TR><TR><TD PORT="gaitsc_lv">gaitsc_lv</TD></TR><TR><TD PORT="bradysc_lv">bradysc_lv</TD></TR><TR><TD PORT="rigidsc_lv">rigidsc_lv</TD></TR><TR><TD PORT="tremsc_lv">tremsc_lv</TD></TR><TR><TD PORT="cog_ep_lv">cog_ep_lv</TD></TR><TR><TD PORT="globcog_lv">globcog_lv</TD></TR><TR><TD PORT="age_bl">age_bl</TD></TR><TR><TD PORT="age_death">age_death</TD></TR><TR><TD PORT="educ">educ</TD></TR><TR><TD PORT="msex">msex</TD></TR><TR><TD PORT="apoe_genotype">apoe_genotype</TD></TR><TR><TD PORT="dlbany">dlbany</TD></TR><TR><TD PORT="arteriol_scler">arteriol_scler</TD></TR><TR><TD PORT="ci_num2_gct">ci_num2_gct</TD></TR><TR><TD PORT="ci_num2_mct">ci_num2_mct</TD></TR><TR><TD PORT="pmAD">pmAD</TD></TR><TR><TD PORT="pathoAD">pathoAD</TD></TR><TR><TD PORT="studyn">studyn</TD></TR><TR><TD PORT="np_sqrt">np_sqrt</TD></TR><TR><TD PORT="nft_sqrt">nft_sqrt</TD></TR><TR><TD PORT="gpath_sqrt">gpath_sqrt</TD></TR><TR><TD PORT="tangles_sqrt">tangles_sqrt</TD></TR><TR><TD PORT="amyloid_sqrt">amyloid_sqrt</TD></TR><TR><TD PORT="apoe4n">apoe4n</TD></TR><TR><TD PORT="pkyrs_bl">pkyrs_bl</TD></TR><TR><TD PORT="EV1">EV1</TD></TR><TR><TD PORT="EV2">EV2</TD></TR><TR><TD PORT="EV3">EV3</TD></TR><TR><TD PORT="EV4">EV4</TD></TR><TR><TD PORT="EV5">EV5</TD></TR><TR><TD PORT="EV6">EV6</TD></TR><TR><TD PORT="EV7">EV7</TD></TR><TR><TD PORT="EV8">EV8</TD></TR><TR><TD PORT="EV9">EV9</TD></TR><TR><TD PORT="EV10">EV10</TD></TR><TR><TD PORT="aa_av_3">aa_av_3</TD></TR></TABLE>>, shape="none"];
+	"gene" [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0"><TR><TD BGCOLOR="lightsteelblue" PORT="table"><B>gene</B></TD></TR><TR><TD PORT="id">id</TD></TR><TR><TD PORT="name">name</TD></TR><TR><TD PORT="chrom">chrom</TD></TR><TR><TD PORT="forward">forward</TD></TR><TR><TD PORT="cds_start">cds_start</TD></TR><TR><TD PORT="cds_end">cds_end</TD></TR></TABLE>>, shape="none"];
+	"transcript" [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0"><TR><TD BGCOLOR="lightsteelblue" PORT="table"><B>transcript</B></TD></TR><TR><TD PORT="id">id</TD></TR><TR><TD PORT="gene_id">gene_id</TD></TR></TABLE>>, shape="none"];
+	"exon" [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0"><TR><TD BGCOLOR="lightsteelblue" PORT="table"><B>exon</B></TD></TR><TR><TD PORT="transcript_id">transcript_id</TD></TR><TR><TD PORT="exon_start">exon_start</TD></TR><TR><TD PORT="exon_end">exon_end</TD></TR></TABLE>>, shape="none"];
+	"cpg" [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0"><TR><TD BGCOLOR="lightsteelblue" PORT="table"><B>cpg</B></TD></TR><TR><TD PORT="id">id</TD></TR><TR><TD PORT="chrom">chrom</TD></TR><TR><TD PORT="position">position</TD></TR><TR><TD PORT="forward">forward</TD></TR></TABLE>>, shape="none"];
+	"snp" [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0"><TR><TD BGCOLOR="lightsteelblue" PORT="table"><B>snp</B></TD></TR><TR><TD PORT="rsid">rsid</TD></TR><TR><TD PORT="chrom">chrom</TD></TR><TR><TD PORT="position">position</TD></TR><TR><TD PORT="forward">forward</TD></TR><TR><TD PORT="ref">ref</TD></TR><TR><TD PORT="alt">alt</TD></TR></TABLE>>, shape="none"];
+	"snp" [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0"><TR><TD BGCOLOR="lightsteelblue" PORT="table"><B>snp</B></TD></TR><TR><TD PORT="rsid">rsid</TD></TR><TR><TD PORT="chrom">chrom</TD></TR><TR><TD PORT="position">position</TD></TR><TR><TD PORT="forward">forward</TD></TR><TR><TD PORT="ref">ref</TD></TR><TR><TD PORT="alt">alt</TD></TR></TABLE>>, shape="none"];
+	"methylation" [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0"><TR><TD BGCOLOR="lightsteelblue" PORT="table"><B>methylation</B></TD></TR><TR><TD PORT="patient_id">patient_id</TD></TR><TR><TD PORT="cpg_id">cpg_id</TD></TR><TR><TD PORT="value">value</TD></TR></TABLE>>, shape="none"];
+	"expression" [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0"><TR><TD BGCOLOR="lightsteelblue" PORT="table"><B>expression</B></TD></TR><TR><TD PORT="patient_id">patient_id</TD></TR><TR><TD PORT="gene_id">gene_id</TD></TR><TR><TD PORT="value">value</TD></TR></TABLE>>, shape="none"];
+	"acetylation" [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0"><TR><TD BGCOLOR="lightsteelblue" PORT="table"><B>acetylation</B></TD></TR><TR><TD PORT="patient_id">patient_id</TD></TR><TR><TD PORT="chrom">chrom</TD></TR><TR><TD PORT="peak_start">peak_start</TD></TR><TR><TD PORT="peak_end">peak_end</TD></TR><TR><TD PORT="value">value</TD></TR></TABLE>>, shape="none"];
+	"genotype" [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0"><TR><TD BGCOLOR="lightsteelblue" PORT="table"><B>genotype</B></TD></TR><TR><TD PORT="patient_id">patient_id</TD></TR><TR><TD PORT="chrom">chrom</TD></TR><TR><TD PORT="position">position</TD></TR><TR><TD PORT="ref">ref</TD></TR><TR><TD PORT="alt">alt</TD></TR><TR><TD PORT="value">value</TD></TR></TABLE>>, shape="none"];
+	"gene":chrom -> "chromosome":chrom;
+	"transcript":gene_id -> "gene":id;
+	"exon":transcript_id -> "transcript":id;
+	"cpg":chrom -> "chromosome":chrom;
+	"snp":chrom -> "chromosome":chrom;
+	"methylation":patient_id -> "patient":id;
+	"methylation":cpg_id -> "cpg":id;
+	"expression":patient_id -> "patient":id;
+	"expression":gene_id -> "gene":id;
+	"acetylation":patient_id -> "patient":id;
+	"acetylation":chrom -> "chromosome":chrom;
+	"genotype":patient_id -> "patient":id;
+	"genotype":chrom -> "chromosome":chrom;
+}
