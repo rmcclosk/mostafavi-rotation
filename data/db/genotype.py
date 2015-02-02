@@ -24,14 +24,23 @@ def merge(intervals):
 def liftover(chr, positions):
     """liftOver a set of positions"""
     with tf("w") as f, tf("w+") as g, tf("w+") as h:
-        for pos in positions:
-            f.write("chr{}\t{}\t{}\n".format(chr, pos, pos+1))
+        for i, pos in enumerate(positions):
+            f.write("chr{}\t{}\t{}\t{}\n".format(chr, pos, pos+1, i))
         f.flush()
         f.seek(0)
         subprocess.call(["liftOver", f.name, "hg19ToHg38.over.chain.gz", g.name, h.name],
                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         g.seek(0)
-        return list(map(int, [line.split("\t")[1] for line in g]))
+
+        res = []
+        i = 0
+        for line in g:
+            line = line.split("\t")
+            while i < int(line[-1]):
+                res.append(None)
+                i += 1
+            res.append(int(line[1]))
+        return res
 
 def resolve_loci(chr, loci, bounds, cur):
     """Get coordinates for each RSID or chromosome locus"""
@@ -47,6 +56,7 @@ def resolve_loci(chr, loci, bounds, cur):
         except TypeError:
             positions.append(None)
     positions = zip(sorted_loci, positions)
+    
 
     # filter out positions not near a TSS
     d = {}
@@ -54,7 +64,7 @@ def resolve_loci(chr, loci, bounds, cur):
     locus, p = next(positions)
     while True:
         if p is None or p <= cur_interval[1]: 
-            d[locus] = None if p is None or p < cur_interval[0] else p
+            d[locus] = None if (p is None or p < cur_interval[0]) else p
             try:
                 locus, p = next(positions)
             except StopIteration:
@@ -63,6 +73,7 @@ def resolve_loci(chr, loci, bounds, cur):
             try:
                 cur_interval = next(bounds)
             except StopIteration:
+                d[locus] = None
                 for locus, p in positions:
                     d[locus] = None
                 break
@@ -70,34 +81,49 @@ def resolve_loci(chr, loci, bounds, cur):
     return [d[x] for x in loci]
 
 def main():
+    chr = int(sys.argv[1])
     con = psycopg2.connect("dbname=cogdec user=rmcclosk")
     cur = con.cursor()
-    writer = csv.writer(sys.stdout, delimiter="\t")
     thresh = 100000
 
-    tss_query = ("SELECT DISTINCT tss FROM tss t "
-                 "JOIN expression e ON e.gene_id = t.gene_id "
-                 "JOIN gene g ON g.id = t.gene_id "
-                 "WHERE g.chrom = %s")
-    patient_query = "SELECT id FROM patient WHERE alt_id = %s"
-    for chr in range(1, 23):
-        # find all transcription start sites for genes in the expression assay
-        cur.execute(tss_query, (chr,))
-        tss = sorted([row[0] for row in cur.fetchall()])
+    cur.execute("SELECT distinct p.alt_id, p.id FROM patient p;")
+    patients = dict(cur.fetchall())
 
-        # pull RSIDs and old co-ordinates out of assay files
-        for dosage_file in glob.glob("*/chr{}/*.trans.txt".format(chr)):
-            bounds = merge([(t-thresh, t+thresh) for t in tss])
-            with open(dosage_file) as f:
-                reader = csv.reader(f, delimiter=" ")
-                header = next(reader)
-                header = resolve_loci(chr, header, bounds, cur)
-                for row in reader:
-                    cur.execute(patient_query, (row.pop(0),))
-                    patient_id = cur.fetchone()[0]
-                    for i, value in enumerate(row):
-                        if header[i] is not None:
-                            writer.writerow((patient_id, chr, header[i], value))
+    # get the non-imputed SNPs
+    with open("input/chr{}.snps".format(chr)) as f:
+        snps = [row[1] for row in csv.reader(f, delimiter="\t")]
+        snps = dict.fromkeys(snps)
+
+    for snp in snps:
+        rsid = snp.replace("rs", "")
+        cur.execute("SELECT position FROM snp WHERE rsid = %s", (rsid,))
+        try:
+            snps[snp] = cur.fetchone()[0]
+        except TypeError:
+            continue
+
+    # load data
+    writer = csv.writer(sys.stdout, delimiter="\t")
+    for dosage_file in glob.glob("transposed_1kG/chr{}/chr{}.*.trans.txt".format(chr, chr)):
+        sys.stderr.write("Loading file {}\n".format(dosage_file))
+        with open(dosage_file) as f:
+            reader = csv.reader(f, delimiter=" ")
+            header = next(reader)
+            rsid = header[:]
+            for i, h in enumerate(header):
+                try:
+                    header[i] = snps[h]
+                except KeyError:
+                    header[i] = None
+
+            for row in reader:
+                try:
+                    patient_id = patients[row.pop(0)]
+                except KeyError:
+                    continue
+                for i, value in enumerate(row):
+                    if header[i] is not None:
+                        writer.writerow((patient_id, chr, header[i], round(float(value))))
     con.close()
 
 if __name__ == "__main__":
