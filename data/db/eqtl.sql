@@ -6,7 +6,7 @@ CREATE TABLE eqtl (
     gene_id INTEGER NOT NULL,
     position INTEGER NOT NULL,
     rho REAL NOT NULL,
-    p_value REAL NOT NULL
+    p_value DOUBLE PRECISION NOT NULL
 );
 
 -- partition tables
@@ -75,25 +75,25 @@ CREATE TRIGGER insert_eqtl_trigger
 COPY eqtl FROM '../db/eqtl.tsv';
 
 -- foreign key constraints
-ALTER TABLE genotype_chr1 ADD CONSTRAINT fk_eqtl_gene_chr1 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr2 ADD CONSTRAINT fk_eqtl_gene_chr2 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr3 ADD CONSTRAINT fk_eqtl_gene_chr3 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr4 ADD CONSTRAINT fk_eqtl_gene_chr4 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr5 ADD CONSTRAINT fk_eqtl_gene_chr5 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr6 ADD CONSTRAINT fk_eqtl_gene_chr6 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr7 ADD CONSTRAINT fk_eqtl_gene_chr7 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr8 ADD CONSTRAINT fk_eqtl_gene_chr8 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr9 ADD CONSTRAINT fk_eqtl_gene_chr9 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr10 ADD CONSTRAINT fk_eqtl_gene_chr10 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr11 ADD CONSTRAINT fk_eqtl_gene_chr11 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr12 ADD CONSTRAINT fk_eqtl_gene_chr12 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr13 ADD CONSTRAINT fk_eqtl_gene_chr13 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr14 ADD CONSTRAINT fk_eqtl_gene_chr14 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr15 ADD CONSTRAINT fk_eqtl_gene_chr15 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr16 ADD CONSTRAINT fk_eqtl_gene_chr16 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr17 ADD CONSTRAINT fk_eqtl_gene_chr17 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr18 ADD CONSTRAINT fk_eqtl_gene_chr18 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr19 ADD CONSTRAINT fk_eqtl_gene_chr19 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr20 ADD CONSTRAINT fk_eqtl_gene_chr20 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr21 ADD CONSTRAINT fk_eqtl_gene_chr21 FOREIGN KEY (gene_id) REFERENCES gene(id);
-ALTER TABLE genotype_chr22 ADD CONSTRAINT fk_eqtl_gene_chr22 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr1 ADD CONSTRAINT fk_eqtl_gene_chr1 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr2 ADD CONSTRAINT fk_eqtl_gene_chr2 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr3 ADD CONSTRAINT fk_eqtl_gene_chr3 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr4 ADD CONSTRAINT fk_eqtl_gene_chr4 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr5 ADD CONSTRAINT fk_eqtl_gene_chr5 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr6 ADD CONSTRAINT fk_eqtl_gene_chr6 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr7 ADD CONSTRAINT fk_eqtl_gene_chr7 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr8 ADD CONSTRAINT fk_eqtl_gene_chr8 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr9 ADD CONSTRAINT fk_eqtl_gene_chr9 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr10 ADD CONSTRAINT fk_eqtl_gene_chr10 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr11 ADD CONSTRAINT fk_eqtl_gene_chr11 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr12 ADD CONSTRAINT fk_eqtl_gene_chr12 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr13 ADD CONSTRAINT fk_eqtl_gene_chr13 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr14 ADD CONSTRAINT fk_eqtl_gene_chr14 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr15 ADD CONSTRAINT fk_eqtl_gene_chr15 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr16 ADD CONSTRAINT fk_eqtl_gene_chr16 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr17 ADD CONSTRAINT fk_eqtl_gene_chr17 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr18 ADD CONSTRAINT fk_eqtl_gene_chr18 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr19 ADD CONSTRAINT fk_eqtl_gene_chr19 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr20 ADD CONSTRAINT fk_eqtl_gene_chr20 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr21 ADD CONSTRAINT fk_eqtl_gene_chr21 FOREIGN KEY (gene_id) REFERENCES gene(id);
+ALTER TABLE eqtl_chr22 ADD CONSTRAINT fk_eqtl_gene_chr22 FOREIGN KEY (gene_id) REFERENCES gene(id);

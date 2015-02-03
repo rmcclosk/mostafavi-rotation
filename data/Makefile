@@ -1,5 +1,6 @@
 DBDIR=db
-TABLES=chromosome patient gene module expression snp cpg genotype methylation acetylation
+TABLES=chromosome patient gene module expression snp cpg genotype methylation acetylation eqtl
+CHRS=1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22
 
 all: db
 
@@ -19,15 +20,20 @@ $(DBDIR)/cpg.timestamp: cpg.txt.gz
 $(DBDIR)/methylation.timestamp: ill450kMeth_all_740_imputed.txt phenotype_740qc_finalFromLori.txt
 $(DBDIR)/expression.timestamp: residual_gene_expression_expressed_genes_2FPKM100ind.txt IDmapping.txt
 $(DBDIR)/acetylation.timestamp: chipSeqResiduals.csv.gz peakInfo.csv.gz 
-$(DBDIR)/genotype.timestamp: affy omni
 
-%.timestamp: %.py %.sql %.tsv
-	./$(word 1,$^) > $(patsubst %.timestamp,%.tsv,$@) &
-	psql < $(word 2,$^)
+$(DBDIR)/genotype.timestamp: transposed_1kG input $(DBDIR)/genotype.py $(DBDIR)/genotype.sql $(DBDIR)/genotype_post.sql
+	psql < $(word 4, $^)
+	$(foreach chr,$(CHRS),python3 -u $(word 3, $^) $(chr) | psql -c "COPY genotype_chr$(chr) FROM STDIN";)
+	psql < $(word 5, $^)
 	date > $@
 
-%.tsv: 
+%.timestamp: %.sql %.tsv
+	psql < $(word 1,$^)
+	date > $@
+
+%.tsv: %.py
 	mkfifo $@
+	./$^ > $@ &
 
 ill450kMeth_all_740_imputed.txt phenotype_740qc_finalFromLori.txt: 
 	ln -s /broad/dejagerlab/cogdec/datasets/ROSMAP/DNA_Methylation/DNA_Methylation_Brain_DLPFC_450K/frozenDataSet/$@ .
@@ -60,3 +66,9 @@ hg19ToHg38.over.chain.gz:
 wgEncodeHaibMethyl450CpgIslandDetails.txt.gz:
 	wget ftp://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibMethyl450/supplemental/$(patsubst %.gz,%,$@)
 	gzip $(patsubst %.gz,%,$@)
+
+transposed_1kG:
+	ln -s /broad/dejagerlab/cogdec/GWAS/ROSMAP/scripts/reformat_dosage_1kg_all_chrs/$@ .
+
+input:
+	ln -s /broad/dejagerlab/cogdec/datasets/ROSMAP/imputation_20101123/$@ .
