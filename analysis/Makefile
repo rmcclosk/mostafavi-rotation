@@ -1,4 +1,4 @@
-analyses = deal deal-genes cgbayesnets cgbayesnets-genes
+analyses = deal deal-genes cgbayesnets cgbayesnets-genes compare-genes
 pngs = $(patsubst %,%.png,$(analyses))
 gvs = $(patsubst %,%.gv,$(analyses))
 
@@ -20,6 +20,9 @@ deal%.gv: deal%.net
 
 deal%.net: deal%.R
 	./$^
+
+compare-genes.gv: deal-genes.gv cgbayesnets-genes.gv
+	./compare_graphs.py $^ > $@
 
 clean:
 	rm -f *.net *.png *.gv

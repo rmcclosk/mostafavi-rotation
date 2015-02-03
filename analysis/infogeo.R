@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-library(RSQLite)
+library(RPostgreSQL)
 
 # definition 1, Janzing et al. 2014
 may.cause <- function (x, y) {
@@ -13,7 +13,8 @@ range01 <- function(x){(x-min(x))/(max(x)-min(x))}
 vars <- c("tangles_sqrt", "amyloid_sqrt", "globcog_random_slope")
 query <- paste("SELECT", paste(vars, collapse=", "), "FROM patient WHERE",
                paste(vars, collapse=" IS NOT NULL AND "), "IS NOT NULL")
-con <- dbConnect(SQLite(), "../data/db-pheno.sqlite")
+drv <- dbDriver("PostgreSQL")
+con <- dbConnect(drv, dbname="cogdec")
 data <- dbGetQuery(con, query)
 . <- dbDisconnect(con)
 

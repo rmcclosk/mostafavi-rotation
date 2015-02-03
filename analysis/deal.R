@@ -2,7 +2,7 @@
 
 # Bayesian network on phenotypes with the deal package.
 
-library(RSQLite)
+library(RPostgreSQL)
 library(deal)
 
 nice.dim <- function (n) {
@@ -13,17 +13,17 @@ nice.dim <- function (n) {
 
 set.seed(0)
 
-con <- dbConnect(SQLite(), "../data/db-pheno.sqlite")
+drv <- dbDriver("PostgreSQL")
+con <- dbConnect(drv, dbname="cogdec")
 
 vars <- c("tangles_sqrt", "amyloid_sqrt", "globcog_random_slope", "pathoAD",
           "pmAD")
 query <- paste("SELECT", paste(vars, collapse=", "), "FROM patient WHERE",
                paste(vars, collapse=" IS NOT NULL AND "), "IS NOT NULL")
 data <- dbGetQuery(con, query)
-data$pathoAD <- factor(data$pathoAD)
-data$pmAD <- factor(data$pmAD)
-. <- dbDisconnect(con)
-nrow(data)
+data$pathoad <- factor(data$pathoad)
+data$pmad <- factor(data$pmad)
+dbDisconnect(con)
 
 # mixed continuous and discrete, exhaustive search
 net <- network(data)
