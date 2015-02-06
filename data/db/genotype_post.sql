@@ -92,7 +92,7 @@ CREATE INDEX idx_genotype_position_chr17 ON genotype_chr17 (position);
 CREATE INDEX idx_genotype_position_chr18 ON genotype_chr18 (position);
 CREATE INDEX idx_genotype_position_chr19 ON genotype_chr19 (position);
 CREATE INDEX idx_genotype_position_chr20 ON genotype_chr20 (position);
-CREATE INDEX idx_genotype_position_chr21 ON genotype_chr21 (position);
+CREATE INDEX idx_genotype_position_chr21 ON genotype_chr21 (position;
 CREATE INDEX idx_genotype_position_chr22 ON genotype_chr22 (position);
 
 -- drop MAF < 0.1

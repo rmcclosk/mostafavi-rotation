@@ -12,7 +12,6 @@ def main():
     thresh = 100000
     
     for chr in range(1, 23):
-        if chr != 2: continue
         peak_query = "SELECT DISTINCT peak_start, peak_end FROM acetylation_chr%s"
         cur.execute(peak_query, (chr,))
         peaks = cur.fetchall()

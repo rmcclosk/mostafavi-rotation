@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS acetylation;
+DROP TABLE IF EXISTS acetylation CASCADE;
 
 -- main table
 CREATE TABLE acetylation (

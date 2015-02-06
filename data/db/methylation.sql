@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS methylation;
+DROP TABLE IF EXISTS methylation CASCADE;
 
 -- main table
 CREATE TABLE methylation (
@@ -120,6 +120,54 @@ CREATE INDEX idx_methylation_patient_chr19 ON methylation_chr19 (patient_id);
 CREATE INDEX idx_methylation_patient_chr20 ON methylation_chr20 (patient_id);
 CREATE INDEX idx_methylation_patient_chr21 ON methylation_chr21 (patient_id);
 CREATE INDEX idx_methylation_patient_chr22 ON methylation_chr22 (patient_id);
+
+-- index by position
+CREATE INDEX idx_methylation_position_chr1 ON methylation_chr1 (position);
+CREATE INDEX idx_methylation_position_chr2 ON methylation_chr2 (position);
+CREATE INDEX idx_methylation_position_chr3 ON methylation_chr3 (position);
+CREATE INDEX idx_methylation_position_chr4 ON methylation_chr4 (position);
+CREATE INDEX idx_methylation_position_chr5 ON methylation_chr5 (position);
+CREATE INDEX idx_methylation_position_chr6 ON methylation_chr6 (position);
+CREATE INDEX idx_methylation_position_chr7 ON methylation_chr7 (position);
+CREATE INDEX idx_methylation_position_chr8 ON methylation_chr8 (position);
+CREATE INDEX idx_methylation_position_chr9 ON methylation_chr9 (position);
+CREATE INDEX idx_methylation_position_chr10 ON methylation_chr10 (position);
+CREATE INDEX idx_methylation_position_chr11 ON methylation_chr11 (position);
+CREATE INDEX idx_methylation_position_chr12 ON methylation_chr12 (position);
+CREATE INDEX idx_methylation_position_chr13 ON methylation_chr13 (position);
+CREATE INDEX idx_methylation_position_chr14 ON methylation_chr14 (position);
+CREATE INDEX idx_methylation_position_chr15 ON methylation_chr15 (position);
+CREATE INDEX idx_methylation_position_chr16 ON methylation_chr16 (position);
+CREATE INDEX idx_methylation_position_chr17 ON methylation_chr17 (position);
+CREATE INDEX idx_methylation_position_chr18 ON methylation_chr18 (position);
+CREATE INDEX idx_methylation_position_chr19 ON methylation_chr19 (position);
+CREATE INDEX idx_methylation_position_chr20 ON methylation_chr20 (position);
+CREATE INDEX idx_methylation_position_chr21 ON methylation_chr21 (position);
+CREATE INDEX idx_methylation_position_chr22 ON methylation_chr22 (position);
+
+-- cluster by position
+CLUSTER methylation_chr1 USING idx_methylation_position_chr1;
+CLUSTER methylation_chr2 USING idx_methylation_position_chr2;
+CLUSTER methylation_chr3 USING idx_methylation_position_chr3;
+CLUSTER methylation_chr4 USING idx_methylation_position_chr4;
+CLUSTER methylation_chr5 USING idx_methylation_position_chr5;
+CLUSTER methylation_chr6 USING idx_methylation_position_chr6;
+CLUSTER methylation_chr7 USING idx_methylation_position_chr7;
+CLUSTER methylation_chr8 USING idx_methylation_position_chr8;
+CLUSTER methylation_chr9 USING idx_methylation_position_chr9;
+CLUSTER methylation_chr10 USING idx_methylation_position_chr10;
+CLUSTER methylation_chr11 USING idx_methylation_position_chr11;
+CLUSTER methylation_chr12 USING idx_methylation_position_chr12;
+CLUSTER methylation_chr13 USING idx_methylation_position_chr13;
+CLUSTER methylation_chr14 USING idx_methylation_position_chr14;
+CLUSTER methylation_chr15 USING idx_methylation_position_chr15;
+CLUSTER methylation_chr16 USING idx_methylation_position_chr16;
+CLUSTER methylation_chr17 USING idx_methylation_position_chr17;
+CLUSTER methylation_chr18 USING idx_methylation_position_chr18;
+CLUSTER methylation_chr19 USING idx_methylation_position_chr19;
+CLUSTER methylation_chr20 USING idx_methylation_position_chr20;
+CLUSTER methylation_chr21 USING idx_methylation_position_chr21;
+CLUSTER methylation_chr22 USING idx_methylation_position_chr22;
 
 -- analyse
 ANALYZE methylation_chr1;
