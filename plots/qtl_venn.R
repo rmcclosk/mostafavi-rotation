@@ -63,8 +63,6 @@ doit <- function (query, table, qtl.order) {
         cat("done\n")
         res
     }))
-    dbDisconnect(con)
-    
     data[,q_value_1 := qvalue(p_value_1)$qvalue]
     data[,q_value_2 := qvalue(p_value_2)$qvalue]
 
@@ -83,7 +81,8 @@ doit <- function (query, table, qtl.order) {
     )
     dev.off()
 }
-
+    
 #doit(equery, "eqtl", c("eQTLs", "aceQTLs", "meQTLs"))
-#doit(aquery, "aceqtl", c("aceQTLs", "eQTLs", "meQTLs"))
-doit(mquery, "meqtl", c("meQTLs", "eQTLs", "aceQTLs"))
+doit(aquery, "aceqtl", c("aceQTLs", "eQTLs", "meQTLs"))
+#doit(mquery, "meqtl", c("meQTLs", "eQTLs", "aceQTLs"))
+dbDisconnect(con)
