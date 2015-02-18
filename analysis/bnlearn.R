@@ -7,6 +7,7 @@ library(Rgraphviz)
 library(data.table)
 library(bnlearn)
 library(deal)
+library(knitr)
 
 set.seed(0)
 
@@ -69,12 +70,11 @@ to.gv <- function (adjmat, title) {
                     rep(rownames(adjmat), ncol(adjmat)), 
                     rep(colnames(adjmat), each=nrow(adjmat)), 
                     ((adjmat-1)*4/max(adjmat-1))+1)
-    arcs <- arcs[which(adjmat > 0)]
     paste("digraph {", 
           '\tgraph [K="1.5"];',
           '\tlabelloc="t";',
           sprintf('\tlabel="%s";', title),
-          paste(arcs, collapse="\n"),
+          paste(arcs[adjmat > 0], collapse="\n"),
           "}\n",
           sep="\n")
 }
@@ -84,8 +84,11 @@ scores <- c("loglik-g", "aic-g", "bic-g", "bge")
 tests <- c("cor", "zf", "mi-g", "mi-g-sh")
 bnlearn.design <- data.frame(algo=rep(c("tabu", "gs"), each=16),
                              score.or.test=c(rep(scores, each=4), rep(tests, each=4)),
-                             blacklist=1:32 %% 4 < 2,
-                             data=ifelse(1:32 %% 2 == 0, "best", "pca"))
+                             blacklist=ifelse(1:32 %% 4 < 2, "blacklist", "NULL"),
+                             data=ifelse(1:32 %% 2 == 0, "best", "pca"),
+                             stringsAsFactors=FALSE)
+kable(bnlearn.design, format="markdown")
+quit()
 
 ################################################################################
 # MAIN
@@ -93,6 +96,7 @@ bnlearn.design <- data.frame(algo=rep(c("tabu", "gs"), each=16),
 
 # retrieve all QTLs which are common to all three feature types
 qtls <- get.dt(sapply(1:22, function (chr) sprintf(sel.cmd, chr, chr, chr)))
+#qtls <- get.dt(sapply(1:1, function (chr) sprintf(sel.cmd, chr, chr, chr)))
 
 # retrieve data for all features associated with QTLs
 edata <- qtls[,get.dt(sprintf(equery, chrom, gene_id)), "chrom,position,gene_id"]
@@ -134,29 +138,25 @@ setDF(best.data)
 setDF(pca.data)
 pca.data$g <- as.numeric(pca.data$g)
 
+data <- list(best=best.data, pca=pca.data)
+
 # make bnlearn networks in several ways
 apply(bnlearn.design, 1, function (row) {
-    if (row[4] == "best") 
-        net.data <- best.data 
-    else 
-        net.data <- pca.data
-
-    if (row[3] == " TRUE")
-        bl <- blacklist
+    net.data <- data[[row["data"]]]
+    indices <- list(group=interaction(net.data[,1],net.data[,2],drop=TRUE))
+    do.by <- function (...)
+        by(net.data[,-c(1,2)], indices, match.fun(row["algo"]), 
+           blacklist=eval(parse(text=row["blacklist"])), ...)
+    if (row["algo"] == "tabu")
+        nets <- do.by(score=row["score.or.test"])
     else
-        bl <- NULL
+        nets <- do.by(test=row["score.or.test"])
 
-    if (row[1] == "tabu")
-                
-        nets <- by(net.data[,-c(1,2)], list(group=interaction(net.data[,1],net.data[,2],drop=TRUE)), 
-                   tabu, score=row[2], blacklist=NULL)
-    else
-        nets <- by(net.data[,-c(1,2)], list(group=interaction(net.data[,1],net.data[,2],drop=TRUE)), 
-                   gs, test=row[2], blacklist=NULL)
-
-    title <- paste("bnlearn", sprintf("%s data", row[4]), ifelse(row[1] == "tabu", "score-based", "constraint-based"),
-                   ifelse(row[3] == " TRUE", "blacklist", "no blacklist"), sep=", ")
-    cat(to.gv(arc.table(nets), title))
+    fn <- paste0(gsub(" ", "", paste(row, collapse="-")), ".dot")
+    title <- paste("bnlearn", row[4], row[1], row[2],
+                   ifelse(row[3] == "blacklist", "blacklist", "no blacklist"), 
+                   sep=", ")
+    cat(to.gv(arc.table(nets), title), file=file.path("bnlearn", fn))
 })
 
 quit()

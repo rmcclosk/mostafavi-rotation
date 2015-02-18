@@ -26,10 +26,9 @@ mquery <- paste("SELECT patient_id, value AS value%d",
 gquery <- paste("SELECT patient_id, value AS genotype",
                 "FROM genotype_chr%d WHERE position = %d")
 
+
 meqtls <- do.call(rbind, lapply(1:22, function (chr) {
-    cat("Chromosome", chr, "\n")
-    meqtls <- get.dt(sprintf(meqtl.query, chr))
-    
+
     get.methyl <- function (pos) 
         get.dt.pid(sprintf(mquery, pos, chr, pos))
     
@@ -40,10 +39,13 @@ meqtls <- do.call(rbind, lapply(1:22, function (chr) {
         get.dt.pid(sprintf(gquery, chr, pos))[patients,genotype]
     
     cor.pca <- function (geno, methyl) 
-        cor.test(geno, prcomp(methyl)$x[,1], method="spearman")$p.value
+        log10(cor.test(geno, prcomp(methyl)$x[,1], method="spearman")$p.value)
+    
+    cat("Chromosome", chr, "\n")
+    meqtls <- get.dt(sprintf(meqtl.query, chr))
     
     meqtls[,cor.pca := cor.pca(get.genotype(snp_position), get.all.methyl(cpg_position)), snp_position]
-    meqtls[,mean.p := mean(p_value), snp_position]
+    meqtls[,mean.log.p := mean(log10(p_value)), snp_position]
     meqtls[,n.cpgs := length(unique(cpg_position)), snp_position]
 }))
 
@@ -51,13 +53,13 @@ meqtls <- subset(meqtls, n.cpgs > 1)
 meqtls[, n.cpgs := cut(n.cpgs, breaks=5)]
 head(setkey(meqtls, snp_position))
 png("meqtl_pca.png")
-ggplot(meqtls, aes(x=mean.p, y=cor.pca, col=n.cpgs, shape=n.cpgs)) +
+ggplot(meqtls, aes(x=-mean.log.p, y=-cor.pca, col=n.cpgs, shape=n.cpgs)) +
     geom_point(size=3) +
     stat_function(fun=identity, col="black", linetype="dashed") +
     scale_y_log10() +
     scale_x_log10() +
-    xlab("mean P-value of meQTL correlations") +
-    ylab("P-value of correlation with PC1") +
+    xlab("mean -log P-value of meQTL correlations") +
+    ylab("-log P-value of correlation with PC1") +
     theme_bw()
 dev.off()
 
