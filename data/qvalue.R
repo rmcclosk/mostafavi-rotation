@@ -30,14 +30,14 @@ edata <- do.adjust(do.get(equery))
 write.table(edata, file="db/eqtl.tsv", sep="\t", row.names=F, col.names=F, quote=F)
 
 cat("done\nCorrecting aceQTLs... ")
-aquery <- "SELECT chrom, peak_centre AS feature, snp_position AS position, p_value FROM aceqtl"
+aquery <- "SELECT chrom, peak_centre AS feature, snp_position AS position, rho, p_value FROM aceqtl"
 adata <- do.adjust(do.get(aquery))
 write.table(adata, file="db/aceqtl.tsv", sep="\t", row.names=F, col.names=F, quote=F)
 
 cat("done\nCorrecting meQTLs... ")
-mquery <- "SELECT chrom, cpg_position AS feature, snp_position AS position, p_value FROM meqtl"
+mquery <- "SELECT chrom, cpg_position AS feature, snp_position AS position, rho, p_value FROM meqtl"
 mdata <- do.adjust(do.get(mquery))
-write.table(adata, file="db/meeqtl.tsv", sep="\t", row.names=F, col.names=F, quote=F)
+write.table(mdata, file="db/meqtl.tsv", sep="\t", row.names=F, col.names=F, quote=F)
 cat("done\n")
 
 dbDisconnect(con)
