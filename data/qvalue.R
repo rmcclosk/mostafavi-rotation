@@ -6,38 +6,37 @@ library(qvalue)
 library(RPostgreSQL)
 library(data.table)
 
-do.get <- function (query) {
-    data <- dbGetQuery(con, query)
-    setDT(data)
-    setkey(data, chrom, feature)
-    data
-}
+tfile <- tempfile()
 
-do.adjust <- function (data) {
+get.dt <- function (query) 
+    setkey(setDT(dbGetQuery(con, query)), chrom, feature)
+
+do.adjust <- function (query, table) {
+    data <- get.dt(query)
     data[,adj_p_value := p.adjust(p_value, method="holm"), "chrom,feature"]
     qval.data <- data[,min(adj_p_value),"chrom,feature"][,q_value := qvalue(V1)$qvalue]
-    data <- merge(data, qval.data)
-    data[,V1 := NULL]
-    data
+    data <- merge(data, qval.data)[,V1 := NULL]
+
+    write.table(data, file=tfile, sep="\t", row.names=F, col.names=F, quote=F)
+    dbGetQuery(con, "BEGIN TRANSACTION")
+    tryCatch({
+        dbGetQuery(con, paste("DELETE FROM", table))
+        dbGetQuery(con, sprintf("COPY %s FROM '%s'", table, tfile))
+        dbCommit(con)
+    }, error = function (e) {
+        dbRollback(con)
+    })
 }
 
 drv <- dbDriver("PostgreSQL")
 con <- dbConnect(drv, dbname="cogdec")
 
-cat("Correcting eQTLs... ")
 equery <- "SELECT chrom, gene_id AS feature, position, rho, p_value FROM eqtl"
-edata <- do.adjust(do.get(equery))
-write.table(edata, file="db/eqtl.tsv", sep="\t", row.names=F, col.names=F, quote=F)
-
-cat("done\nCorrecting aceQTLs... ")
 aquery <- "SELECT chrom, peak_centre AS feature, snp_position AS position, rho, p_value FROM aceqtl"
-adata <- do.adjust(do.get(aquery))
-write.table(adata, file="db/aceqtl.tsv", sep="\t", row.names=F, col.names=F, quote=F)
-
-cat("done\nCorrecting meQTLs... ")
 mquery <- "SELECT chrom, cpg_position AS feature, snp_position AS position, rho, p_value FROM meqtl"
-mdata <- do.adjust(do.get(mquery))
-write.table(mdata, file="db/meqtl.tsv", sep="\t", row.names=F, col.names=F, quote=F)
-cat("done\n")
+
+do.adjust(equery, "eqtl")
+do.adjust(aquery, "aceqtl")
+do.adjust(mquery, "meqtl")
 
 dbDisconnect(con)

@@ -21,6 +21,9 @@ $(DBDIR)/methylation.timestamp: ill450kMeth_all_740_imputed.txt phenotype_740qc_
 $(DBDIR)/expression.timestamp: residual_gene_expression_expressed_genes_2FPKM100ind.txt IDmapping.txt
 $(DBDIR)/acetylation.timestamp: chipSeqResiduals.csv.gz peakInfo.csv.gz 
 
+$(DBDIR)/aceqtl.timestamp: $(DBDIR)/meqtl.timestamp $(DBDIR)/eqtl.timestamp
+	./qvalue.R
+
 $(DBDIR)/genotype.timestamp: transposed_1kG input $(DBDIR)/genotype.py $(DBDIR)/genotype.sql $(DBDIR)/genotype_post.sql
 	psql < $(word 4, $^)
 	$(foreach chr,$(CHRS),python3 -u $(word 3, $^) $(chr) | psql -c "COPY genotype_chr$(chr) FROM STDIN";)

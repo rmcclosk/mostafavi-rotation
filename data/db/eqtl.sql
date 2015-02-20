@@ -6,7 +6,9 @@ CREATE TABLE eqtl (
     gene_id INTEGER NOT NULL,
     position INTEGER NOT NULL,
     rho REAL NOT NULL,
-    p_value DOUBLE PRECISION NOT NULL
+    p_value DOUBLE PRECISION NOT NULL,
+    adj_p_value DOUBLE PRECISION NOT NULL DEFAULT 1,
+    q_value DOUBLE PRECISION NOT NULL DEFAULT 1
 );
 
 -- partition tables
@@ -71,7 +73,6 @@ CREATE TRIGGER insert_eqtl_trigger
     BEFORE INSERT ON eqtl
     FOR EACH ROW EXECUTE PROCEDURE eqtl_insert_trigger();
 
--- load data
 COPY eqtl FROM '../db/eqtl.tsv';
 
 -- foreign key constraints

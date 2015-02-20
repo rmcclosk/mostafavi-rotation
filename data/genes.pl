@@ -1,5 +1,7 @@
 #!/usr/bin/env perl
 
+# Retrieve a list of all genes and ID's from Ensembl.
+
 use strict;
 use Bio::EnsEMBL::Registry;
 use Bio::EnsEMBL::DBSQL::GeneAdaptor;
