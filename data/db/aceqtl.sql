@@ -6,7 +6,9 @@ CREATE TABLE aceqtl (
     peak_centre INTEGER NOT NULL,
     snp_position INTEGER NOT NULL,
     rho REAL NOT NULL,
-    p_value DOUBLE PRECISION NOT NULL
+    p_value DOUBLE PRECISION NOT NULL,
+    adj_p_value DOUBLE PRECISION NOT NULL DEFAULT 1,
+    q_value DOUBLE PRECISION NOT NULL DEFAULT 1
 );
 
 -- partition tables
@@ -72,4 +74,4 @@ CREATE TRIGGER insert_aceqtl_trigger
     FOR EACH ROW EXECUTE PROCEDURE aceqtl_insert_trigger();
 
 -- load data
-COPY aceqtl FROM '../db/aceqtl.tsv';
+COPY aceqtl (chrom, peak_centre, snp_position, rho, p_value) FROM '../db/aceqtl.tsv';

@@ -72,4 +72,4 @@ CREATE TRIGGER insert_meqtl_trigger
     FOR EACH ROW EXECUTE PROCEDURE meqtl_insert_trigger();
 
 -- load data
-COPY meqtl FROM '../db/meqtl.tsv';
+COPY meqtl_chr1 FROM '../db/meqtl.tsv';
