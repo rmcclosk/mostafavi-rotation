@@ -13,3 +13,6 @@ psql.log
 bsub.sh
 input
 transposed_1kG
+SNPChrPosOnRef
+ROSMAP_brain_rnaseq_best_eQTL.txt
+eQTL

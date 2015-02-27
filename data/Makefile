@@ -2,22 +2,21 @@ DBDIR=db
 TABLES=chromosome patient gene module expression snp cpg genotype methylation acetylation eqtl meqtl aceqtl
 CHRS=1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22
 
-all: db
+all: db eqtl
 
 schema.png: schema.dot
 	dot -Tpng $^ > $@
 
-schema.dot: draw_schema.py $(patsubst %,$(DBDIR)/%.sql,$(TABLES))
-	cat $(wordlist 2,$(words $^),$^) | ./$(firstword $^) > $@
+eqtl: $(patsubst %,SNPChrPosOnRef/chr%.bcp,$(CHRS))
 
 db: $(patsubst %,$(DBDIR)/%.timestamp,$(TABLES))
 
 $(DBDIR)/chromosome.timestamp: chromInfo.txt.gz
 $(DBDIR)/patient.timestamp: pheno_cov_n2963_092014_forPLINK.csv techvars_plus_phenotypes26SEP2014.txt
-$(DBDIR)/gene.timestamp: ensemblGenes.txt.gz
+$(DBDIR)/gene.timestamp: ensemblGenes.tsv
 $(DBDIR)/snp.timestamp: SNPChrPosOnRef.bcp.gz
 $(DBDIR)/cpg.timestamp: cpg.txt.gz
-$(DBDIR)/methylation.timestamp: ill450kMeth_all_740_imputed.txt phenotype_740qc_finalFromLori.txt
+$(DBDIR)/methylation.timestamp: ill450kMeth_all_740_imputed.txt
 $(DBDIR)/expression.timestamp: residual_gene_expression_expressed_genes_2FPKM100ind.txt IDmapping.txt
 $(DBDIR)/acetylation.timestamp: chipSeqResiduals.csv.gz peakInfo.csv.gz 
 
@@ -38,7 +37,7 @@ $(DBDIR)/genotype.timestamp: transposed_1kG input $(DBDIR)/genotype.py $(DBDIR)/
 	mkfifo $@
 	./$^ > $@ &
 
-ill450kMeth_all_740_imputed.txt phenotype_740qc_finalFromLori.txt: 
+ill450kMeth_all_740_imputed.txt:
 	ln -s /broad/dejagerlab/cogdec/datasets/ROSMAP/DNA_Methylation/DNA_Methylation_Brain_DLPFC_450K/frozenDataSet/$@ .
 
 residual_gene_expression_expressed_genes_2FPKM100ind.txt IDmapping.txt:
@@ -50,9 +49,11 @@ chipSeqResiduals.csv.gz peakInfo.csv.gz:
 pheno_cov_n2963_092014_forPLINK.csv techvars_plus_phenotypes26SEP2014.txt:
 	ln -s /home/unix/mostafav/projects/cogdec_mnet/phenotype_data/$@ .
 
-ensemblGenes.txt.gz:
-	./genes.pl > $(patsubst %.gz,%,$@)
-	gzip $(patsubst %.gz,%,$@)
+ensemblGenes.tsv:
+	./genes.pl > $@
+
+SNPChrPosOnRef/chr%.bcp: SNPChrPosOnRef.bcp.gz
+	zcat $^ | grep ^[0-9]*$$'\t'$(patsubst SNPChrPosOnRef/chr%.bcp,%,$@)$$'\t' > $@
 
 SNPChrPosOnRef.bcp.gz:
 	wget -O $@ -nd -r -A '*_$(patsubst %.bcp.gz,%,$@)_*.bcp.gz' ftp://ftp.ncbi.nih.gov/snp/database/organism_data/human_9606/

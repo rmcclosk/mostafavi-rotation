@@ -11,6 +11,8 @@ def main():
     writer = csv.writer(sys.stdout, delimiter="\t")
     gene_ptn = re.compile(".*:ENSG(?P<geneid>\d+)")
     gene_query = "SELECT id, chrom, CASE WHEN forward THEN gene_start ELSE gene_end END FROM gene WHERE id = %s"
+
+    done_patients = set([])
     with open("residual_gene_expression_expressed_genes_2FPKM100ind.txt") as f:
         reader = csv.reader(f, delimiter="\t")
         header = next(reader)[1:]
@@ -23,6 +25,7 @@ def main():
             if i % 100 == 0:
                 sys.stderr.write("Done {} rows\n".format(i))
             patient_id = row.pop(0).split(":")[0]
+            if patient_id in done_patients: continue
             cur.execute("SELECT * FROM patient WHERE id = %s", (patient_id,))
             if cur.fetchone() is None: continue
 
@@ -30,6 +33,7 @@ def main():
                 if gene_ids[i] is not None:
                     gene_id, chrom, pos = gene_ids[i]
                     writer.writerow((patient_id, gene_id, chrom, pos, value))
+            done_patients.add(patient_id)
     con.close()
 
 if __name__ == "__main__":
