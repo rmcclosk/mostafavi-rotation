@@ -7,7 +7,7 @@ vars = {'tangles_sqrt', 'amyloid_sqrt', 'globcog_random_slope', 'pathoAD', 'pmAD
 
 col_idx = [];
 for i = 1:length(vars)
-    col_idx = [col_idx find(strcmp(cols, vars{i}))]; % the first 2 columns were strings
+    col_idx = [col_idx find(strcmp(cols, vars{i}))]; 
 end
 
 cols = cols(col_idx);
@@ -22,7 +22,7 @@ data = data(all(isfinite(data), 2),:);
 %       priorPrecision.maxParents; % hard-limit on the number of parents
 priorPrecision.nu = 1;
 priorPrecision.sigma2 = 1;
-priorPrecision.alpha = 10; 
+priorPrecision.alpha = 10;
 priorPrecision.maxParents = 3;
 
 FullBNet = FullBNLearn(data, vars, 'pmAD', 0, 'pmAD', priorPrecision);
