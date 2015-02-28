@@ -1,18 +1,19 @@
+% Analyse phenotype relationships with CGBayesNets.
+
 SetUpCGBayesNets;
 
-con = database('cogdec','rmcclosk','', 'Vendor','PostgreSQL');
+[data, cols] = RCSVLoad('../../data/pheno_cov_n2963_092014_forPLINK.csv', false, ',', false, [1]);
 vars = {'tangles_sqrt', 'amyloid_sqrt', 'globcog_random_slope', 'pathoAD', 'pmAD'};
 
-query = ['SELECT ', strjoin(vars, ', '), ' FROM patient WHERE ', ...
-         strjoin(vars, ' IS NOT NULL AND '), ' IS NOT NULL'];
-curs = exec(con, query);
-curs = fetch(curs);
-[nrow, ncol] = size(curs.Data);
-for i=1:nrow
-    for j=1:ncol
-        data(i,j) = cast(cell2mat(curs.Data(i, j)), 'double');
-    end;
-end;
+col_idx = [];
+for i = 1:length(vars)
+    col_idx = [col_idx find(strcmp(cols, vars{i}))]; % the first 2 columns were strings
+end
+
+cols = cols(col_idx);
+data = data(:,col_idx-2);
+data(data == -9) = NaN;
+data = data(all(isfinite(data), 2),:);
 
 % common parameter values:
 %       priorPrecision.nu; % prior sample size for prior variance estimate
@@ -25,4 +26,4 @@ priorPrecision.alpha = 10;
 priorPrecision.maxParents = 3;
 
 FullBNet = FullBNLearn(data, vars, 'pmAD', 0, 'pmAD', priorPrecision);
-GVOutputBayesNet(FullBNet, 'cgbayesnets.gv');
+GVOutputBayesNet(FullBNet, 'phenotypes.gv');
