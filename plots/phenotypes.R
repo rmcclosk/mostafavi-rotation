@@ -1,29 +1,23 @@
 #!/usr/bin/env Rscript
 
-library(RSQLite)
 library(ggplot2)
 library(GGally)
 
-vars <- c("tangles_sqrt", 
-          "amyloid_sqrt",
-          "globcog_random_slope",
-          "pathoAD", 
-          "pmAD")
+cvars <- c("tangles_sqrt", "amyloid_sqrt", "globcog_random_slope")
+dvars <- c("pathoAD", "pmAD")
+data <- read.csv("../data/pheno_cov_n2963_092014_forPLINK.csv", na.strings=c("-9"))
+data <- data[,c(cvars, dvars)]
 
-con <- dbConnect(SQLite(), "../data/db-pheno.sqlite")
-query <- paste("SELECT", paste(vars, collapse=", "), "FROM patient WHERE",
-               paste(vars, collapse=" IS NOT NULL AND "), "IS NOT NULL")
-data <- dbGetQuery(con, query)
-. <- dbDisconnect(con)
-
-data$pathoAD <- factor(data$pathoAD)
-data$pmAD <- factor(data$pmAD)
+data[which(data[,cvars] == 0, arr.ind=TRUE)] <- NA
+data[,dvars] <- lapply(data[,dvars], ordered, levels=c(0, 1))
+data <- na.omit(data)
+head(data)
 
 png("phenotypes.png")
 ggpairs(data)
 dev.off()
 
-. <- sapply(vars[1:3], function (v) {
+. <- sapply(cvars, function (v) {
     png(sprintf("phenotypes/%s.png", v))
     print(ggplot(data, aes_string(x=v)) + geom_density())
     dev.off()
