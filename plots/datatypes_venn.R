@@ -1,22 +1,22 @@
 #!/usr/bin/env Rscript
 
-library(RPostgreSQL)
+library(data.table)
 library(VennDiagram)
 library(RColorBrewer)
 
-drv <- dbDriver("PostgreSQL")
-con <- dbConnect(drv, dbname="cogdec")
+efile <- "../data/residual_gene_expression_expressed_genes_2FPKM100ind.txt"
+afile <- "../data/chipSeqResiduals.csv"
+mfile <- "../data/ill450kMeth_all_740_imputed.txt"
+pfile <- "../data/phenotype_740qc_finalFromLori.txt"
 
-mquery <- paste("SELECT distinct patient_id FROM methylation_chr22")
-mpatients <- dbGetQuery(con, mquery)$patient_id
+id.map <- fread(pfile, select=c("Sample_ID", "projid"), 
+                colClasses=list(character="projid"))
+setkey(id.map, Sample_ID)
 
-aquery <- paste("SELECT distinct patient_id FROM acetylation_chr22")
-apatients <- dbGetQuery(con, aquery)$patient_id
-
-equery <- paste("SELECT distinct patient_id FROM expression_chr22")
-epatients <- dbGetQuery(con, equery)$patient_id
-
-dbDisconnect(con)
+epatients <- fread(efile, select=1)[,gsub(":.*", "", V1)]
+apatients <- colnames(fread(afile, nrows=0, skip=0))
+mpatients <- colnames(fread(mfile, nrows=0, skip=0))
+mpatients <- id.map[mpatients[2:length(mpatients)],projid]
 
 png("datatypes_venn.png")
 draw.triple.venn(
@@ -30,6 +30,4 @@ draw.triple.venn(
     category=c("methylation", "acetylation", "expression"),
     col=brewer.pal(3, "Set2")
 )
-
-
 dev.off()
