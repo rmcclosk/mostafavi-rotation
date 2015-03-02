@@ -28,6 +28,8 @@ name, chromosome, start position, end position, and orientation (forward=TRUE,
 reverse=FALSE). The TSS can be obtained by taking the start position if the
 orientation is forward, otherwise the end position.
 
+__genotype_manifest.tsv__: Manifest of which SNPs are found in which files.
+
 __hg19ToHg38.over.chain.gz__: LiftOver chain file to convert hg19 co-ordinates
 to hg38.
 
@@ -48,6 +50,10 @@ lifted over to hg38 co-ordinates from peakInfo.csv.gz.
 
 __pheno_cov_n2963_092014_forPLINK.csv__: Clinical data for all patients in the
 project. The master ID is the "projid" column.
+
+__phenotype_740qc_finalFromLori.txt__: An older phenotypes file, which maps the
+patient IDs from the methylation experiments (see
+ill450kMeth_all_740_imputed.txt) to project IDs.
 
 __residual_gene_expression_expressed_genes_2FPKM100ind.txt__: Gene expression
 data. Columns are patient IDs (the number before the colon is the project ID,
