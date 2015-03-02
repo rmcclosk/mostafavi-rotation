@@ -1,28 +1,7 @@
-analyses = deal deal-genes cgbayesnets cgbayesnets-genes compare-genes
-pngs = $(patsubst %,%.png,$(analyses))
-gvs = $(patsubst %,%.gv,$(analyses))
+all: compare-modules.png
 
-all: $(pngs)
-
-.SECONDARY: $(gvs)
-
-deal.png: deal.R
-	./$^
-
-%.png: %.gv
+compare-modules.png: compare-modules.gv
 	dot -Tpng $^ > $@
 
-cg%.gv: cg%.m
-	matlab -singleCompThread -nodesktop -nosplash -nojvm < $^
-
-deal%.gv: deal%.net
-	./net2gv.py < $^ > $@
-
-deal%.net: deal%.R
-	./$^
-
-compare-genes.gv: deal-genes.gv cgbayesnets-genes.gv
-	./compare_graphs.py $^ > $@
-
-clean:
-	rm -f *.net *.png *.gv
+compare-modules.gv: compare_graphs.py deal/modules.gv cgbayesnets/modules.gv
+	./$^ > $@
