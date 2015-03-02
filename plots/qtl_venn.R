@@ -4,85 +4,45 @@
 
 library(VennDiagram)
 library(RColorBrewer)
-library(RPostgreSQL)
-library(qvalue)
 library(data.table)
-library(reshape2)
 
-set.seed(0)
+qtl.types <- c("e", "me", "ace")
 
-drv <- dbDriver("PostgreSQL")
-con <- dbConnect(drv, dbname="cogdec")
+best <- lapply(qtl.types, function (x) {
+    fn <- paste0("../primary/", x, "QTL/best.tsv")
+    res <- fread(fn, select=c("q.value", "snp"))[q.value < 0.05,]
+    unique(setkey(res, snp))
+})
+names(best) <- qtl.types
 
-do.get <- function (query) {
-    data <- dbGetQuery(con, query)
-    setDT(data)
-    if (nrow(data) > 0)
-        setkey(data, position)
-    else
-        NULL
-}
+data <- lapply(qtl.types, function (x) {
+    files <- paste0("../primary/", x, "QTL/chr", 1:22, ".tsv")
+    res <- rbindlist(lapply(files, fread))
+    setnames(res, "p-value", "p.value")
+    setkey(res, snp, p.value)
+    res[,.SD[1], snp] # best p-value for each snp
+})
 
-equery <- paste("SELECT DISTINCT ON (e.gene_id) e.position,",
-                "COALESCE(a.p_value, 1) AS p_value_1,",
-                "COALESCE(m.p_value, 1) AS p_value_2",
-                "FROM eqtl_chr%d e",
-                "LEFT JOIN aceqtl_chr%d a",
-                "ON a.snp_position = e.position",
-                "LEFT JOIN meqtl_chr%d m",
-                "ON m.snp_position = e.position",
-                "WHERE e.q_value < 0.05",
-                "ORDER BY e.gene_id, e.adj_p_value")
-
-aquery <- paste("SELECT DISTINCT ON (a.peak_centre) a.snp_position AS position,",
-                "COALESCE(e.p_value, 1) AS p_value_1,",
-                "COALESCE(m.p_value, 1) AS p_value_2",
-                "FROM aceqtl_chr%d a",
-                "LEFT JOIN eqtl_chr%d e",
-                "ON a.snp_position = e.position",
-                "LEFT JOIN meqtl_chr%d m",
-                "ON m.snp_position = a.snp_position",
-                "WHERE a.q_value < 0.05",
-                "ORDER BY a.peak_centre, a.adj_p_value")
-
-mquery <- paste("SELECT DISTINCT ON (m.cpg_position) m.snp_position AS position,",
-                "COALESCE(e.p_value, 1) AS p_value_1,",
-                "COALESCE(a.p_value, 1) AS p_value_2",
-                "FROM meqtl_chr%d m",
-                "LEFT JOIN eqtl_chr%d e",
-                "ON m.snp_position = e.position",
-                "LEFT JOIN aceqtl_chr%d a",
-                "ON m.snp_position = a.snp_position",
-                "WHERE m.q_value < 0.05",
-                "ORDER BY m.cpg_position, m.adj_p_value")
-
-doit <- function (query, table, qtl.order) {
-    data <- do.call(rbind, lapply(1:22, function (chr) {
-        cat("Selecting", table, "from chromosome", chr, "... ")
-        res <- unique(do.get(sprintf(query, chr, chr, chr)))
-        cat("done\n")
-        res
-    }))
-    data[,q_value_1 := qvalue(p_value_1)$qvalue]
-    data[,q_value_2 := qvalue(p_value_2)$qvalue]
-
-    area1 <- nrow(data)
-    area2 <- sum(data[,q_value_1] < 0.05)
-    area3 <- sum(data[,q_value_2] < 0.05)
-    intersect <- sum(data[,q_value_2] < 0.05 & data[,q_value_1] < 0.05)
+sapply(qtl.types, function (qtl.type) {
+    sets <- lapply(data, function (d) {
+        res <- d[best[[qtl.type]],]
+        res[,q.value := p.adjust(p.value, method="fdr")]
+        res[q.value < 0.05, unique(snp)]
+    })
     
-    png(paste0(table, "_venn.png"), height=240, width=240)
+    png(paste0(qtl.type, "qtl_venn.png"))
     draw.triple.venn(
-        area1, area2, area3, area2, intersect, area3, intersect,
-        category=qtl.order,
+        length(sets[[1]]), 
+        length(sets[[2]]), 
+        length(sets[[3]]), 
+        length(intersect(sets[[1]], sets[[2]])),
+        length(intersect(sets[[2]], sets[[3]])),
+        length(intersect(sets[[1]], sets[[3]])),
+        length(Reduce(intersect, sets)),
+        category=paste0(qtl.types, "QTL"),
         col=brewer.pal(3, "Set2"),
         fill=brewer.pal(3, "Set2"),
         alpha=rep(0.3, 3)
     )
     dev.off()
-}
-    
-#doit(equery, "eqtl", c("eQTLs", "aceQTLs", "meQTLs"))
-doit(aquery, "aceqtl", c("aceQTLs", "eQTLs", "meQTLs"))
-#doit(mquery, "meqtl", c("meQTLs", "eQTLs", "aceQTLs"))
-dbDisconnect(con)
+})
