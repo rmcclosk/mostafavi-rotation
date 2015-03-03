@@ -42,6 +42,9 @@ gene module (see allrevcoded.csv). The rows are patient IDs (the number before
 the colon is the project ID, see pheno_cov_n2963_092014_forPLINK.csv), and the
 columns are the modules (see allrevcoded.csv).
 
+__patients.tsv__: Merged data from all the phenotypes files, giving precedence
+to newer data.
+
 __peakInfo.csv.gz__: Start and end locations for CHiP-seq peaks, in hg19
 co-ordinates. See chipSeqResiduals.csv.gz for the actual CHiP-seq data.
 
