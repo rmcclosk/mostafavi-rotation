@@ -3,6 +3,7 @@
 # Bayesian network on phenotypes with the deal package.
 
 library(deal)
+source(file="deal.R")
 
 set.seed(0)
 
@@ -22,16 +23,7 @@ data[,dvars] <- lapply(data[,dvars], ordered, levels=c(0, 1))
 data <- na.omit(data)
 
 # mixed continuous and discrete, exhaustive search
-net <- network(data)
-prior <- jointprior(net)
-net <- learn(net, data, prior)$nw
-all.nets <- networkfamily(data, net, prior)
-all.nets <- nwfsort(all.nets$nw)
-
-scores <- sapply(all.nets, "[[", "score")
-relscores <- sapply(all.nets, "[[", "relscore")
-best.nets <- all.nets[sapply(relscores, all.equal, 1) == "TRUE"]
-head(cbind(scores, relscores))
+best.nets <- best.nets.exhaustive(data)
 
 w <- nice.dim(length(best.nets))
 h <- length(best.nets)/w
