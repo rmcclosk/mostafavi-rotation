@@ -9,7 +9,6 @@ dirs <- c("eQTL", "meQTL", "aceQTL")
 
 sapply(dirs, function (dir) {
     files <- file.path(dir, paste0("chr", 1:22, ".tsv"))
-    files <- head(files, 1) # DEBUG
     
     # read data
     data <- rbindlist(lapply(files, fread))
@@ -36,5 +35,5 @@ sapply(dirs, function (dir) {
 
     # combine best SNPS for covariates and no covariates
     data <- unique(setkey(rbind(dcov, dnocov), feature, snp))
-    write.table(data, paste0(dir, "/best.tsv"))
+    write.table(data, paste0(dir, "/best.tsv"), row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")
 })
