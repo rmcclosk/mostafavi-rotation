@@ -8,3 +8,9 @@ transposed_1kG
 ROSMAP_brain_rnaseq_best_eQTL.txt
 ensemblGenes.tsv
 snp.txt
+cpg.txt
+peak.txt
+chipSeqResiduals.csv
+phenotype_740qc_finalFromLori.txt
+sign_modules_celltypes_PC_Rosemary.txt
+genotype_manifest.tsv

@@ -117,12 +117,15 @@ get.all.qtls <- function (gene, genepos, cvrt, outdir) {
         cur.gene <- t(apply(cur.gene[,feature := NULL], 1, scale.rank))
         dimnames(cur.gene) <- list(feature, cvrt[,projid])
         cur.gene <- SlicedData$new()$CreateFromMatrix(cur.gene)
+
+        stopifnot(colnames(cur.gene) == colnames(cvrt.sd))
     
         setDF(cur.genepos)
         # the genotype data is spread over multiple files
         eqtls <- Reduce(function (x, snp.file) {
             cat(snp.file, "\n")
             snps <- read.snps(snp.file, cur.snpspos, cvrt)
+            stopifnot(colnames(snps) == colnames(cvrt.sd))
             setDF(cur.snpspos)
             res.cov <- do.matrix.eqtl(snps, cur.gene, cur.genepos, cur.snpspos, cvrt.sd)
             res.nocov <- do.matrix.eqtl(snps, cur.gene, cur.genepos, cur.snpspos)
@@ -134,11 +137,8 @@ get.all.qtls <- function (gene, genepos, cvrt, outdir) {
         }, snp.files(chr), init=NULL) # Reduce
         
         # to make it easier later, record the gene name, TSS position, and SNP position in the output
-        print(nrow(eqtls))
         eqtls <- merge(setkey(eqtls, feature), genepos)
-        print(nrow(eqtls))
         eqtls <- merge(setkey(eqtls, snp), snpspos)
-        print(nrow(eqtls))
         eqtls[,feature.pos.2 := NULL]
         write.table(eqtls, sprintf("%s/chr%d.tsv", outdir, chr), col.names=TRUE, row.names=FALSE, quote=FALSE, sep="\t")
     }) # Reduce
