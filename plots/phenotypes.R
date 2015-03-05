@@ -11,7 +11,6 @@ data <- data[,c(cvars, dvars)]
 data[which(data[,cvars] == 0, arr.ind=TRUE)] <- NA
 data[,dvars] <- lapply(data[,dvars], ordered, levels=c(0, 1))
 data <- na.omit(data)
-head(data)
 
 png("phenotypes.png")
 ggpairs(data)

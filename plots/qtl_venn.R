@@ -18,7 +18,6 @@ names(best) <- qtl.types
 data <- lapply(qtl.types, function (x) {
     files <- paste0("../primary/", x, "QTL/chr", 1:22, ".tsv")
     res <- rbindlist(lapply(files, fread))
-    setnames(res, "p-value", "p.value")
     setkey(res, snp, p.value)
     res[,.SD[1], snp] # best p-value for each snp
 })
@@ -30,7 +29,7 @@ sapply(qtl.types, function (qtl.type) {
         res[q.value < 0.05, unique(snp)]
     })
     
-    png(paste0(qtl.type, "qtl_venn.png"))
+    png(paste0(qtl.type, "qtl_venn.png"), height=240, width=240)
     draw.triple.venn(
         length(sets[[1]]), 
         length(sets[[2]]), 

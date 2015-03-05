@@ -1,16 +1,9 @@
-SHELL = /bin/bash
-BSUB = bsub -P cogdec $(BSUB_ARGS)
-#BSUB_ARGS := -K -R rusage[sulfur_io=1] -q bhour 
-MATLAB = matlab -singleCompThread -nodisplay -nojvm -nosplash 
+all: phenotypes.png densities
 
-all: all-ish
+densities: $(patsubst %,phenotypes/%.png,amyloid_sqrt globcog_random_slope tangles_sqrt)
 
-all-ish: tracks.R
+phenotypes.png phenotypes/%.png: phenotypes.R
 	./$^
 
-all-bsub: tracks.R
-	$(BSUB) -o $^.log ./$^
-
-clean:
-	rm *.log
-
+eQTL_venn.png meQTL_venn.png aceQTL_venn.png: qtl_venn.R
+	./$^
