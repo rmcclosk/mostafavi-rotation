@@ -2,58 +2,100 @@
 
 # check if first PC of all CpGs for the same meQTL correlates with the SNP
 
-library(RPostgreSQL)
+library(reshape2)
 library(data.table)
 library(ggplot2)
 
-drv <- dbDriver("PostgreSQL")
-con <- dbConnect(drv, dbname="cogdec")
+# read patient IDs
+cat("Reading patient IDs\n")
+keep.cols <- c("methylation.id", "genotype.id", "projid", "use.for.qtl")
+id.map <- fread("../data/patients.tsv", select=keep.cols)
+id.map <- id.map[which(use.for.qtl)]
+setkey(id.map, methylation.id)
 
-get.dt <- function (query) 
-    setDT(dbGetQuery(con, query))
-get.dt.pid <- function(query) 
-    setkey(get.dt(query), patient_id)
+# read meQTLs
+cat("Reading meQTLs\n")
+meqtl <- fread("../primary/meQTL/best.tsv", 
+               select=c("snp", "feature", "adj.p.value", "q.value"))
+setkey(meqtl, feature, adj.p.value)
+meqtl <- meqtl[,.SD[1], by=feature]
+meqtl <- meqtl[q.value < 0.05,]
+meqtl[,n.cpgs := length(feature), by=snp]
+meqtl <- meqtl[n.cpgs > 1,]
+setkey(meqtl, feature, snp)
 
-mpatients <- get.dt.pid("SELECT distinct patient_id FROM methylation_chr22")
-gpatients <- get.dt.pid("SELECT distinct patient_id FROM genotype_chr22")
-patients <- merge(mpatients, gpatients)
+# get columns of methylation data to read
+cat("Preselecting columns for methylation data\n")
+mfile <- "../data/ill450kMeth_all_740_imputed.txt"
+mpatients <- tail(strsplit(readLines(mfile, n=1), "\t")[[1]], -1)
+keep.cols <- na.omit(id.map[,match(methylation.id, mpatients)])
+mprojid <- id.map[mpatients[keep.cols],projid]
 
-meqtl.query <-paste("SELECT DISTINCT ON (cpg_position) * FROM meqtl_chr%d",
-                    "WHERE q_value < 0.05 ORDER BY cpg_position, adj_p_value",
-                    "LIMIT 100")
-mquery <- paste("SELECT patient_id, value AS value%d",
-                "FROM methylation_chr%d WHERE position = %d")
-gquery <- paste("SELECT patient_id, value AS genotype",
-                "FROM genotype_chr%d WHERE position = %d")
+# get rows of methylation data to read
+cat("Preselecting rows for methylation data\n")
+mfeatures <- fread(mfile, skip=1, select=1)[,V1]
+keep.rows <- sort(match(meqtl[,feature], mfeatures))
 
+# read methylation data
+cat("Reading methylation data\n")
+mdata <- fread(mfile, select=c(1, keep.cols+1))
+setnames(mdata, "TargetID", "feature")
+mdata <- mdata[keep.rows,]
+setkey(mdata, feature)
+setnames(mdata, mpatients[keep.cols], as.character(mprojid))
+stopifnot(mdata[,feature] == unique(meqtl[,feature]))
 
-meqtls <- do.call(rbind, lapply(1:22, function (chr) {
+# transpose methylation data
+cat("Transposing methylation data\n")
+mdata <- melt(mdata, id.vars=c("feature"), variable.name="projid")
+mdata <- dcast.data.table(mdata, projid~feature)
+setkey(mdata, projid)
 
-    get.methyl <- function (pos) 
-        get.dt.pid(sprintf(mquery, pos, chr, pos))
-    
-    get.all.methyl <- function (positions)
-        Reduce(merge, lapply(positions, get.methyl))[patients][,patient_id := NULL]
-    
-    get.genotype <- function (pos)
-        get.dt.pid(sprintf(gquery, chr, pos))[patients,genotype]
-    
-    cor.pca <- function (geno, methyl) 
-        log10(cor.test(geno, prcomp(methyl)$x[,1], method="spearman")$p.value)
-    
-    cat("Chromosome", chr, "\n")
-    meqtls <- get.dt(sprintf(meqtl.query, chr))
-    
-    meqtls[,cor.pca := cor.pca(get.genotype(snp_position), get.all.methyl(cpg_position)), snp_position]
-    meqtls[,mean.log.p := mean(log10(p_value)), snp_position]
-    meqtls[,n.cpgs := length(unique(cpg_position)), snp_position]
-}))
+# get genotype data
+cat("Reading genotype manifest\n")
+manifest <- fread("../data/genotype_manifest.tsv")
+manifest <- manifest[match(meqtl[,snp], snp)]
+setkey(manifest, snp)
+manifest <- unique(manifest)
+manifest[,file := paste0("../data/", file)]
 
-meqtls <- subset(meqtls, n.cpgs > 1)
-meqtls[, n.cpgs := cut(n.cpgs, breaks=5)]
-head(setkey(meqtls, snp_position))
+cat("Preselecting rows for genotype data\n")
+setkey(id.map, genotype.id)
+gfile <- "../data/transposed_1kG/chr1/chr1.560001.560059.snplist.test.snps.dosage.1kg.trans.txt"
+gpatients <- fread(gfile, select=1, skip=1)[,V1]
+keep.rows <- sort(match(id.map[,genotype.id], gpatients))
+gprojid <- id.map[gpatients[keep.rows], projid]
+sed.cmd <- paste0("sed '", paste0(c(1, 1+keep.rows), collapse="p;"), "q;d'")
+
+cat("Reading genotype data\n")
+pb <- txtProgressBar(0, manifest[,length(unique(file))], style=3)
+gdata <- by(manifest, manifest[,file], function (x) {
+    d <- fread(paste(sed.cmd, x[1,file]), select=c(1, 1+x[,column]), skip=1)
+    setnames(d, colnames(d), c("projid", x[,snp]))
+    stopifnot(d[,projid] == gpatients[keep.rows])
+    d[,projid := gprojid]
+    setTxtProgressBar(pb, getTxtProgressBar(pb)+1)
+    setkey(d, projid)
+})
+close(pb)
+gdata <- Reduce(merge, gdata)
+setkey(gdata, projid)
+
+cor.spearman <- function (x, y)
+    cor.test(x, y, method="spearman")$p.value
+
+cor.pca <- function (geno, methyl) 
+    log10(cor.spearman(geno, prcomp(methyl)$x[,1]))
+
+mean.cor <- function (geno, methyl)
+    mean(sapply(methyl, function (m) log10(cor.spearman(geno, m))))
+
+meqtl[,cor.pca := cor.pca(gdata[[as.character(snp)]], mdata[,feature,with=FALSE]), snp]
+meqtl[,mean.log.p := mean.cor(gdata[[as.character(snp)]], mdata[,feature,with=FALSE]), snp]
+
+meqtl[,n.cpgs := cut(n.cpgs, breaks=5)]
 png("meqtl_pca.png")
-ggplot(meqtls, aes(x=-mean.log.p, y=-cor.pca, col=n.cpgs, shape=n.cpgs)) +
+ggplot(meqtl, aes(x=-mean.log.p, y=-cor.pca, col=n.cpgs, shape=n.cpgs)) +
     geom_point(size=3) +
     stat_function(fun=identity, col="black", linetype="dashed") +
     scale_y_log10() +
@@ -62,5 +104,3 @@ ggplot(meqtls, aes(x=-mean.log.p, y=-cor.pca, col=n.cpgs, shape=n.cpgs)) +
     ylab("-log P-value of correlation with PC1") +
     theme_bw()
 dev.off()
-
-dbDisconnect(con)
