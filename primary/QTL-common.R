@@ -1,10 +1,22 @@
 library(data.table)
+library(parallel)
+library(MatrixEQTL)
 
 covariates.file <- "../data/patients.tsv"
 snpspos.file <- "../data/snp.txt"
 snp.files <- function(chr) {
     ptn <- "../data/transposed_1kG/chr%d/chr%d.*.trans.txt"
     Sys.glob(sprintf(ptn, chr, chr))
+}
+ncpus <- 4
+n.pcs <- 20
+
+rm.pcs <- function (data, n.pcs) {
+    s <- svd(data)
+    s$d[(n.pcs+1):length(s$d)] <- 0 
+    res <- data - s$u %*% diag(s$d) %*% t(s$v)
+    dimnames(res) <- dimnames(data)
+    res
 }
 
 read.cvrt <- function () {
@@ -101,7 +113,7 @@ get.all.qtls <- function (gene, genepos, cvrt, outdir) {
     snpspos <- read.snpspos()
     cvrt.sd <- cvrt2sd(cvrt)
 
-    sapply(22:1, function (chr) {
+    mclapply(22:1, function (chr) {
 
         cur.snpspos <- snpspos[snp.chr == chr]
         cur.genepos <- genepos[feature.chr == chr]
@@ -126,12 +138,24 @@ get.all.qtls <- function (gene, genepos, cvrt, outdir) {
             cat(snp.file, "\n")
             snps <- read.snps(snp.file, cur.snpspos, cvrt)
             stopifnot(colnames(snps) == colnames(cvrt.sd))
+
             setDF(cur.snpspos)
+            
+            vcols <- c("rho", "p.value", "t.stat")
             res.cov <- do.matrix.eqtl(snps, cur.gene, cur.genepos, cur.snpspos, cvrt.sd)
             res.nocov <- do.matrix.eqtl(snps, cur.gene, cur.genepos, cur.snpspos)
+            setnames(res.nocov, vcols, paste0(vcols, ".nocov"))
+
+            res <- lapply(1:n.pcs, function (i) {
+                cur.gene.pc <- SlicedData$new()$CreateFromMatrix(rm.pcs(as.matrix(cur.gene), i))
+                res <- do.matrix.eqtl(snps, cur.gene.pc, cur.genepos, cur.snpspos, cvrt.sd)
+                setnames(res, vcols, paste0(vcols, ".PC", i))
+            })
             setDT(cur.snpspos)
-            stopifnot(nrow(res.cov) == nrow(res.nocov))
-            res <- merge(res.cov, res.nocov, suffixes=c("", ".nocov"))
+
+            res[[n.pcs+1]] <- res.cov
+            res[[n.pcs+2]] <- res.nocov
+            res <- Reduce(merge, res)
             stopifnot(nrow(res) == nrow(res.cov))
             rbind(x, res)
         }, snp.files(chr), init=NULL) # Reduce
@@ -141,5 +165,5 @@ get.all.qtls <- function (gene, genepos, cvrt, outdir) {
         eqtls <- merge(setkey(eqtls, snp), snpspos)
         eqtls[,feature.pos.2 := NULL]
         write.table(eqtls, sprintf("%s/chr%d.tsv", outdir, chr), col.names=TRUE, row.names=FALSE, quote=FALSE, sep="\t")
-    }) # Reduce
+    }, mc.cores=ncpus) # Reduce
 }
