@@ -35,4 +35,6 @@ gene[,feature := as.integer(sub("peak", "", feature))]
 setkey(gene, feature)
 setcolorder(gene, c("feature", as.character(sort(patients[keep.cols]))))
 
+gene <- na.omit(gene)
+
 get.all.qtls(gene, genepos, cvrt, "aceQTL")

@@ -8,15 +8,17 @@ snp.files <- function(chr) {
     ptn <- "../data/transposed_1kG/chr%d/chr%d.*.trans.txt"
     Sys.glob(sprintf(ptn, chr, chr))
 }
-ncpus <- 4
+ncpus <- 2
 n.pcs <- 20
 
 rm.pcs <- function (data, n.pcs) {
+    data <- t(data)
     s <- svd(data)
     s$d[(n.pcs+1):length(s$d)] <- 0 
     res <- data - s$u %*% diag(s$d) %*% t(s$v)
+    res <- apply(res, 2, scale.rank)
     dimnames(res) <- dimnames(data)
-    res
+    t(res)
 }
 
 read.cvrt <- function () {
@@ -113,7 +115,7 @@ get.all.qtls <- function (gene, genepos, cvrt, outdir) {
     snpspos <- read.snpspos()
     cvrt.sd <- cvrt2sd(cvrt)
 
-    mclapply(22:1, function (chr) {
+    mclapply(15:1, function (chr) {
 
         cur.snpspos <- snpspos[snp.chr == chr]
         cur.genepos <- genepos[feature.chr == chr]
@@ -126,11 +128,15 @@ get.all.qtls <- function (gene, genepos, cvrt, outdir) {
 
         # make a SlicedData for the current features
         feature <- cur.gene[,feature]
-        cur.gene <- t(apply(cur.gene[,feature := NULL], 1, scale.rank))
+        cur.gene <- as.matrix(cur.gene[,feature := NULL])
         dimnames(cur.gene) <- list(feature, cvrt[,projid])
-        cur.gene <- SlicedData$new()$CreateFromMatrix(cur.gene)
 
-        stopifnot(colnames(cur.gene) == colnames(cvrt.sd))
+        cur.gene.sd <- t(apply(cur.gene, 1, scale.rank))
+        stopifnot(all(apply(cur.gene.sd, 1, function (x) isTRUE(all.equal(sd(x), 1)))))
+        dimnames(cur.gene.sd) <- dimnames(cur.gene)
+        cur.gene.sd <- SlicedData$new()$CreateFromMatrix(cur.gene.sd)
+
+        stopifnot(colnames(cur.gene.sd) == colnames(cvrt.sd))
     
         setDF(cur.genepos)
         # the genotype data is spread over multiple files
@@ -142,12 +148,17 @@ get.all.qtls <- function (gene, genepos, cvrt, outdir) {
             setDF(cur.snpspos)
             
             vcols <- c("rho", "p.value", "t.stat")
-            res.cov <- do.matrix.eqtl(snps, cur.gene, cur.genepos, cur.snpspos, cvrt.sd)
-            res.nocov <- do.matrix.eqtl(snps, cur.gene, cur.genepos, cur.snpspos)
+            res.cov <- do.matrix.eqtl(snps, cur.gene.sd, cur.genepos, cur.snpspos, cvrt.sd)
+            res.nocov <- do.matrix.eqtl(snps, cur.gene.sd, cur.genepos, cur.snpspos)
             setnames(res.nocov, vcols, paste0(vcols, ".nocov"))
 
             res <- lapply(1:n.pcs, function (i) {
-                cur.gene.pc <- SlicedData$new()$CreateFromMatrix(rm.pcs(as.matrix(cur.gene), i))
+                cur.gene.pc <- rm.pcs(cur.gene, i)
+                stopifnot(all(apply(cur.gene.pc, 1, function (x) isTRUE(all.equal(sd(x), 1)))))
+                stopifnot(rownames(cur.gene.pc) == feature)
+                stopifnot(colnames(cur.gene.pc) == cvrt[,projid])
+
+                cur.gene.pc <- SlicedData$new()$CreateFromMatrix(cur.gene.pc)
                 res <- do.matrix.eqtl(snps, cur.gene.pc, cur.genepos, cur.snpspos, cvrt.sd)
                 setnames(res, vcols, paste0(vcols, ".PC", i))
             })
