@@ -47,4 +47,11 @@ gpatients <- fread(gfile, skip=1, select=1)[,V1]
 gprojid <- as.integer(gsub("[A-Z]", "", gpatients))
 p[,genotype.id := gpatients[match(projid, gprojid)]]
 
+# which patients we are using for the experiments
+id.vars <- c("methylation.id", "genotype.id", "expression.id", "acetylation.id")
+cov.vars <- c("pmi", "msex", "age_death", "EV1", "EV2", "EV3")
+drop.rows <- p[,unique(which(is.na(.SD), arr.ind=TRUE)[,"row"]), .SDcols=c(id.vars, cov.vars)]
+p[,use.for.qtl := TRUE]
+p[drop.rows, use.for.qtl := FALSE]
+
 write.table(p, "patients.tsv", row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")
