@@ -4,30 +4,33 @@ library(data.table)
 library(VennDiagram)
 library(RColorBrewer)
 
-efile <- "../data/residual_gene_expression_expressed_genes_2FPKM100ind.txt"
-afile <- "../data/chipSeqResiduals.csv"
-mfile <- "../data/ill450kMeth_all_740_imputed.txt"
-pfile <- "../data/phenotype_740qc_finalFromLori.txt"
+data <- fread("../data/patients.tsv")
 
-id.map <- fread(pfile, select=c("Sample_ID", "projid"), 
-                colClasses=list(character="projid"))
-setkey(id.map, Sample_ID)
+epatients <- data[!is.na(expression.id), projid]
+mpatients <- data[!is.na(methylation.id), projid]
+apatients <- data[!is.na(acetylation.id), projid]
+gpatients <- data[!is.na(genotype.id), projid]
 
-epatients <- fread(efile, select=1)[,gsub(":.*", "", V1)]
-apatients <- colnames(fread(afile, nrows=0, skip=0))
-mpatients <- colnames(fread(mfile, nrows=0, skip=0))
-mpatients <- id.map[mpatients[2:length(mpatients)],projid]
+data <- list(epatients, mpatients, apatients, gpatients)
+
+# http://stackoverflow.com/questions/24748170/finding-all-possible-combinations-of-vector-intersections
+combos <- Reduce(c, lapply(1:4, function(x) combn(1:4, x, simplify=FALSE) ))
+areas <- lapply(lapply(combos, function(x) Reduce(intersect,data[x]) ), length)
+
+venn.args <- areas
+venn.args[["category"]] <- c("expression", "methylation", "acetylation", "genotype")
+venn.args[["fill"]] <- brewer.pal(4, "Set2")
+venn.args[["cex"]] = 1.5
+venn.args[["cat.cex"]] = 1.5
+venn.args[["ind"]] = FALSE
+venn.args[["margin"]] = 0.05
+
+p <- do.call(draw.quad.venn, venn.args)
 
 png("datatypes_venn.png")
-draw.triple.venn(
-    length(mpatients), 
-    length(apatients), 
-    length(epatients),
-    length(intersect(mpatients, apatients)),
-    length(intersect(apatients, epatients)),
-    length(intersect(mpatients, epatients)),
-    length(intersect(intersect(apatients, mpatients), epatients)),
-    category=c("methylation", "acetylation", "expression"),
-    col=brewer.pal(3, "Set2")
-)
+grid.draw(p)
+dev.off()
+
+pdf("datatypes_venn.pdf")
+grid.draw(p)
 dev.off()

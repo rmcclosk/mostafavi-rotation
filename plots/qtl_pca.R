@@ -2,35 +2,32 @@
 
 library(reshape2)
 library(data.table)
+library(ggplot2)
 
-keeps <- c("feature", "snp", "q.value", paste0("q.value.PC", 1:20))
-data <- fread("../primary/eQTL/best.tsv", select=keeps)
+cols <- c(paste0("q.value", c("", paste0(".PC", 1:20))))
+keeps <- c("feature", "snp", cols)
+edata <- fread("../primary/eQTL/best.tsv", select=keeps)
+adata <- fread("../primary/aceQTL/best.tsv", select=keeps)
+mdata <- fread("../primary/meQTL/best.tsv", select=keeps)
 
-n.features <- c(
-    data[q.value < 0.05, length(unique(feature))],
-    data[q.value.PC1 < 0.05, length(unique(feature))],
-    data[q.value.PC2 < 0.05, length(unique(feature))],
-    data[q.value.PC3 < 0.05, length(unique(feature))],
-    data[q.value.PC4 < 0.05, length(unique(feature))],
-    data[q.value.PC5 < 0.05, length(unique(feature))],
-    data[q.value.PC6 < 0.05, length(unique(feature))],
-    data[q.value.PC7 < 0.05, length(unique(feature))],
-    data[q.value.PC8 < 0.05, length(unique(feature))],
-    data[q.value.PC9 < 0.05, length(unique(feature))],
-    data[q.value.PC10 < 0.05, length(unique(feature))],
-    data[q.value.PC11 < 0.05, length(unique(feature))],
-    data[q.value.PC12 < 0.05, length(unique(feature))],
-    data[q.value.PC13 < 0.05, length(unique(feature))],
-    data[q.value.PC14 < 0.05, length(unique(feature))],
-    data[q.value.PC15 < 0.05, length(unique(feature))],
-    data[q.value.PC16 < 0.05, length(unique(feature))],
-    data[q.value.PC17 < 0.05, length(unique(feature))],
-    data[q.value.PC18 < 0.05, length(unique(feature))],
-    data[q.value.PC19 < 0.05, length(unique(feature))],
-    data[q.value.PC20 < 0.05, length(unique(feature))])
-n.features
+n.features <- as.data.frame(do.call(rbind, lapply(cols, function (x) {
+    c(genes=edata[edata[[x]] < 0.05, length(unique(feature))],
+      peaks=adata[adata[[x]] < 0.05, length(unique(feature))],
+      CpGs=mdata[mdata[[x]] < 0.05, length(unique(feature))])
+})))
+n.features$`PCs removed` <- 0:20
+n.features <- melt(n.features, id.vars=c("PCs removed"), variable.name="feature.type", value.name="significant features")
 
-png("eqtl_pca.png")
-plot(0:20, n.features, xlab="PCs removed", ylab="Significant genes")
-lines(0:20, n.features)
+p <- ggplot(n.features, aes(x=`PCs removed`, y=`significant features`)) + 
+    geom_point() + 
+    geom_line() +
+    theme_bw() +
+    facet_grid(feature.type~., scales="free")
+
+png("qtl_pca.png")
+print(p)
+dev.off()
+
+pdf("qtl_pca.pdf")
+print(p)
 dev.off()
