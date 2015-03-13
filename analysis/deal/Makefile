@@ -1,4 +1,4 @@
-all: phenotypes.png modules.png modules.gv
+all: phenotypes.png modules.png modules.gv qtl.png
 
 %.png: %.R
 	./$^
