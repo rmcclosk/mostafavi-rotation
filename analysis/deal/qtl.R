@@ -21,6 +21,8 @@ d <- data.frame(topology=c(tops))
 agg <- aggregate(1:nrow(d), list(d$topology), length)
 d$topology <- factor(d$topology, levels=agg[,1][order(agg[,2])])
 
+head(agg[order(-agg[,2]),])
+
 p <- ggplot(d, aes(x=topology)) + 
     geom_bar() +
     theme_bw() +
