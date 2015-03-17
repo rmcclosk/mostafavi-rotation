@@ -12,6 +12,9 @@ priorPrecision.sigma2 = 1;
 priorPrecision.alpha = 10; 
 priorPrecision.maxParents = 10;
 
+searchParameter.backtracking = true;
+searchParameter.nophenotype = true;
+
 % read module means
 fid = fopen('../../data/module_means_filtered_byphenotype.txt');
 header = strsplit(fgetl(fid), '\t');
@@ -56,7 +59,8 @@ pdata = pdata(prows,:);
 data = [mdata pdata];
 cols = [mcols pcols];
 data = data(all(isfinite(data), 2),:);
+disc = IsDiscrete(data);
 
 % build the network
-FullBNet = FullBNLearn(data, cols, 'pmad', 0, 'pmad', priorPrecision);
+FullBNet = FullBNLearn(data, cols, 'pmad', 0, 'pmad', priorPrecision, disc, false, searchParameter);
 GVOutputBayesNet(FullBNet, 'modules.gv');

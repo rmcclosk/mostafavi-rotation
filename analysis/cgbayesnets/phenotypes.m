@@ -25,5 +25,10 @@ priorPrecision.sigma2 = 1;
 priorPrecision.alpha = 10;
 priorPrecision.maxParents = 3;
 
-FullBNet = FullBNLearn(data, vars, 'pmAD', 0, 'pmAD', priorPrecision);
+searchParameter.backtracking = true;
+searchParameter.nophenotype = true;
+
+disc = IsDiscrete(data);
+
+FullBNet = FullBNLearn(data, vars, 'pmAD', 0, 'pmAD', priorPrecision, disc, false, searchParameter);
 GVOutputBayesNet(FullBNet, 'phenotypes.gv');
