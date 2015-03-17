@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+# Find overlapping QTLs using a pi_0 approach.
+
 library(data.table)
 library(qvalue)
 library(knitr)
@@ -54,16 +56,27 @@ overlap <- apply(expand.grid(data.types, data.types), 1, function (x) {
 })
 
 qtl.names <- paste0(data.types, "QTLs")
-names(overlap) <- rep(qtl.names, 3)
+names(overlap) <- rep(qtl.names, length(qtl.names))
 
 overlap.size <- matrix(sapply(overlap, length), nrow=length(data.types))
 dimnames(overlap.size) <- list(qtl.names, qtl.names)
-kable(overlap.size, "markdown")
+cat(kable(overlap.size, "markdown"), file="qtl_overlap.md")
 
 do.venn <- function (sets) {
     # http://stackoverflow.com/questions/24748170/finding-all-possible-combinations-of-vector-intersections
     combos <- Reduce(c, lapply(1:length(sets), function(x) combn(1:length(sets), x, simplify=FALSE) ))
-    venn.args <- lapply(lapply(combos, function(x) Reduce(intersect, sets[x]) ), length)
+    venn.args <- lapply(lapply(combos, function(x) {
+        if (length(x) > 1) 
+            Reduce(intersect, sets[x]) 
+        else
+            sets[[x]] 
+    }), length)
+    if (length(sets) == 3) {
+        tmp <- venn.args[[5]]
+        venn.args[[5]] <- venn.args[[6]]
+        venn.args[[6]] <- tmp
+    }
+    print(venn.args)
     venn.args[["category"]] <- names(sets)
     venn.args[["fill"]] <- brewer.pal(length(sets), "Set2")
     venn.args[["cex"]] = 1.5
@@ -77,13 +90,13 @@ do.venn <- function (sets) {
 }
 
 png("eqtl_venn.png")
-do.venn(list(overlap[[1]], overlap[[4]], overlap[[7]]))
+grid.draw(do.venn(list(overlap[[1]], overlap[[4]], overlap[[7]])))
 dev.off()
 
 png("aceqtl_venn.png")
-do.venn(list(overlap[[2]], overlap[[5]], overlap[[8]]))
+grid.draw(do.venn(list(overlap[[2]], overlap[[5]], overlap[[8]])))
 dev.off()
 
 png("meqtl_venn.png")
-do.venn(list(overlap[[3]], overlap[[6]], overlap[[9]]))
+grid.draw(do.venn(list(overlap[[3]], overlap[[6]], overlap[[9]])))
 dev.off()
