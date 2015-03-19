@@ -1,4 +1,4 @@
-all: genes.png
+all: genes.png snps.png
 
 %.png: %.R
 	./$^
