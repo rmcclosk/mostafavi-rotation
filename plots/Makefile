@@ -11,3 +11,6 @@ multiQTL_%.png eQTL_%.png meQTL_%.png aceQTL_%.png: qtl_%.R
 
 %.png: %.R
 	./$^
+
+clean:
+	rm *.png *.pdf
