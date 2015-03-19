@@ -75,6 +75,7 @@ best.stats <- function (data) {
 data <- list(ebest, mbest, abest)
 best.data <- do.call(cbind, lapply(data, best.stats))
 colnames(best.data) <- c("eQTL", "meQTL", "aceQTL")
-kable(best.data, "markdown")
+tbl <- kable(best.data, "markdown")
+cat(tbl, file="qtl_table.md", sep="\t")
 #tbl <- rbind(tbl, best.data)
 #kable(tbl, "markdown")

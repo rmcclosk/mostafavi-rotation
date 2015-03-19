@@ -32,6 +32,10 @@ setnames(gene, "TargetID", "feature")
 setnames(gene, mpatients[keep.cols-1], as.character(cvrt[mpatients[keep.cols-1],projid]))
 setkey(gene, feature)
 
+genepos <- genepos[feature.chr %in% c(1, 2),]
+gene <- merge(gene, genepos[,"feature",with=FALSE])
+gc()
+
 setkey(cvrt, projid)
 
 # run Matrix eQTL

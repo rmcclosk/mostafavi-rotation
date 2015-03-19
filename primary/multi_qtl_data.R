@@ -107,6 +107,8 @@ read.edata <- function () {
 # read genotype data
 read.gdata <- function () {
     manifest <- fread("../data/genotype_manifest.tsv")
+    manifest <- manifest[grepl("rs", snp),]
+    manifest[,snp := as.integer(sub("rs", "", snp))]
     setkey(manifest, snp)
     manifest <- merge(manifest, multi.qtls[,"snp",with=FALSE])
     setkey(manifest, file, column)

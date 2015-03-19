@@ -3,7 +3,7 @@
 library(data.table)
 
 files <- paste0(c("e", "ace", "me"), "QTL/best.tsv")
-vars <- c(".PC10", ".PC20", ".PC10")
+vars <- c(".PC10", ".PC10", ".PC10")
 data <- mapply(function (f, v) {
     keep.cols <- c("feature", "snp", paste0("q.value", v), paste0("adj.p.value", v))
     res <- fread(f, select=keep.cols)
