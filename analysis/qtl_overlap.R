@@ -60,7 +60,7 @@ names(overlap) <- rep(qtl.names, length(qtl.names))
 
 overlap.size <- matrix(sapply(overlap, length), nrow=length(data.types))
 dimnames(overlap.size) <- list(qtl.names, qtl.names)
-cat(kable(overlap.size, "markdown"), file="qtl_overlap.md")
+cat(kable(overlap.size, "markdown"), file="qtl_overlap.md", sep="\n")
 
 do.venn <- function (sets) {
     # http://stackoverflow.com/questions/24748170/finding-all-possible-combinations-of-vector-intersections
