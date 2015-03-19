@@ -18,8 +18,7 @@ best <- lapply(qtl.types, function (x) {
 names(best) <- qtl.types
 
 qtls <- lapply(best, function (x) x[,unique(snp)])
-pdf("qtl_venn.pdf")
-    draw.triple.venn(
+v <- draw.triple.venn(
         length(qtls[[1]]),
         length(qtls[[2]]),
         length(qtls[[3]]),
@@ -31,6 +30,11 @@ pdf("qtl_venn.pdf")
         fill=c("red", "blue", "green"),
         alpha=rep(0.3, 3), 
         cex=2, cat.cex=2)
+
+pdf("qtl_venn.pdf")
+grid.draw(v)
 dev.off()
 
-quit()
+pdf("qtl_venn.png")
+grid.draw(v)
+dev.off()
