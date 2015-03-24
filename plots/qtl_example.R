@@ -1,16 +1,23 @@
 #!/usr/bin/env Rscript
 
+# Plot one example of a multi-QTL.
+
 library(data.table)
 library(reshape2)
 library(ggplot2)
+library(rolasized)
+library(tikzDevice)
+library(ggthemes)
+
+sol <- solarized.Colours(variant = "srgb")
 
 data <- fread("../primary/multi_qtl_data.tsv", drop="projid")
 data <- data[which(snp == sample(snp, 1))]
 
-xlab <- sprintf("genotype (RS%d)", data[1,snp])
-elab <- sprintf("expression (ENSG%011d)", data[1,feature.e])
-alab <- sprintf("acetylation (peak%d)", data[1,feature.ace])
-mlab <- sprintf("methylation (%s)", data[1,feature.me])
+xlab <- "genotype"
+elab <- "expression"
+alab <- "acetylation"
+mlab <- "methylation"
 
 id.vars <- c("snp", "g", "feature.e", "feature.me", "feature.ace")
 data <- melt(data, id.vars=id.vars, variable.name="data.type")
@@ -21,15 +28,19 @@ data[,data.type := factor(data.type, levels=c("e", "ace", "me"),
 p <- ggplot(data, aes(x=g, y=value, col=data.type, group=data.type)) +
     geom_point() +
     stat_smooth() +
+    theme_solarized() +
     facet_grid(data.type~., scales="free") +
-    theme_bw() +
     theme(legend.position = "none") +
     labs(x=xlab, y=NULL)
 
 pdf("qtl_example.pdf")
-print(p)
+print(p + theme_bw() + theme(legend.position = "none"))
 dev.off()
 
 png("qtl_example.png")
+print(p + theme_bw() + theme(legend.position = "none"))
+dev.off()
+
+tikz("qtl_example.tex", width=3, height=3, bg=sol$base3, fg=sol$base00)
 print(p)
 dev.off()

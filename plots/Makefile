@@ -13,4 +13,4 @@ multiQTL_%.png eQTL_%.png meQTL_%.png aceQTL_%.png: qtl_%.R
 	./$^
 
 clean:
-	rm *.png *.pdf
+	rm *.png *.pdf *.tex
