@@ -45,6 +45,8 @@ pdf("datatypes_venn.pdf", bg="transparent")
 grid.draw(do.call(draw.quad.venn, venn.args))
 dev.off()
 
-tikz("datatypes_venn.tex", bg=sol$base3, fg=sol$base00)
+tikz("datatypes_venn.tex", width=3.2, height=3, bg=sol$base3, fg=sol$base00)
+venn.args[["cex"]] = 1
+venn.args[["cat.cex"]] = 1
 grid.draw(do.call(draw.quad.venn, venn.args))
 dev.off()

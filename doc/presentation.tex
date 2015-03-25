@@ -1,6 +1,7 @@
 \documentclass{beamer}
 \usepackage{tikz}
 \usepackage{hyperref}
+\beamertemplatenavigationsymbolsempty
 
 \usetikzlibrary{shapes}
 \usetikzlibrary{shapes.misc}
@@ -13,18 +14,20 @@
 \usetikzlibrary{automata}
 \usetikzlibrary{external}
 
-\tikzexternalize
+\tikzexternalize[prefix=presentation-figures]
 
 \title[Omics data integration]{Integrative causality analysis of genetic,
 epigenetic, and transcriptomic data in a large cohort}
 \author[R. McCloskey \& S. Mostafavi]
     {Rosemary McCloskey and Sara Mostafavi \\\hfill\\
+     \small
      \url{rmcclosk.math@gmail.com} \\
-     \url{slideshare.com/blahblahblah}}
+     \url{http://slideshare.net/rmcclosk/omics-integration}
+     \normalsize}
 \date{March 27, 2015}
 
 \usetheme{Madrid}
-\usecolortheme[dark]{solarized}
+\usecolortheme{solarized}
 
 \begin{document}
 
@@ -218,18 +221,45 @@ epigenetic, and transcriptomic data in a large cohort}
 \begin{frame}{Thank you!}
     \begin{columns}
         \begin{column}{0.5\textwidth}
+            \small
+            \textbf{Harvard / Broad}
             \begin{itemize}
-                \item All the bioinformatics students
+                \setlength\itemsep{-2pt}
+                \item Philip L. D. Jager
+                \item Lori Chibnik
+                \item Jishu Xu
+                \item Charles White
+                \item Cristin McCabe
+                \item Towfique Raj
+            \end{itemize}
+            \textbf{Rush}
+            \begin{itemize}
+                \setlength\itemsep{-2pt}
+                \item David A Bennett
+                \item Chris Gaiteri
+                \item Lei Yu
+            \end{itemize}
+            \textbf{Bioinformatics Training Program}
+            \begin{itemize}
+                \setlength\itemsep{-2pt}
+                \item All the students
                 \item Sharon Ruschkowski
             \end{itemize}
         \end{column}
+        \normalsize
         \begin{column}{0.5\textwidth}
             \begin{center}
-                \includegraphics[scale=0.3]{logos/test} \\
+                \includegraphics[scale=0.3]{logos/cmmt} \\
+                \hfill\\
                 \includegraphics[scale=0.2]{logos/bioinfo} \\
+                \hfill\\
                 \includegraphics[scale=0.2]{logos/ubc} \\
+                \hfill\\
                 \includegraphics[scale=0.1]{logos/nserc} \\
-                \includegraphics[scale=0.2]{logos/cihr}
+                \hfill\\
+                \includegraphics[scale=0.1]{logos/broad} \\
+                \hfill\\
+                \includegraphics[scale=0.1]{logos/rush}
             \end{center}
         \end{column}
     \end{columns}

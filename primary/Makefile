@@ -6,10 +6,8 @@ all: multi_qtl_data.tsv
 multi_qtl_data.tsv: multi_qtl_data.R multi_qtl.tsv
 	./$(word 1, $^)
 
-multi_qtl.tsv: multi_qtl.R best
+multi_qtl.tsv: multi_qtl.R eQTL/best.tsv meQTL/best.tsv aceQTL/best.tsv
 	./$(word 1, $^)
-
-best: eQTL/best.tsv meQTL/best.tsv aceQTL/best.tsv
 
 %QTL/best.tsv: qvalue.R $(addprefix %,$(QTL_FILES))
 	./$(word 1, $^) --args $(dir $@)

@@ -1,40 +1,40 @@
 #!/usr/bin/env Rscript
 
-# eQTL analysis
+# Find all aceQTL associations
 
 library(data.table)
 library(MatrixEQTL)
 
 source(file="QTL-common.R")
 
-gene.file <- "../data/chipSeqResiduals.csv"
-genepos.file <- "../data/peak.txt"
+ace.file <- "../data/chipSeqResiduals.csv"
+acepos.file <- "../data/peak.txt"
 
 # read covariates
 cvrt <- read.cvrt()
 
 # read peak positions
-genepos <- fread(genepos.file)
-setnames(genepos, colnames(genepos), c("feature.chr", "start", "end", "feature"))
-genepos[,feature := as.integer(sub("peak", "", feature))]
-genepos[,feature.chr := as.integer(sub("chr", "", feature.chr))]
-genepos[,feature.pos := as.integer((start+end)/2)]
-genepos[,c("start", "end") := NULL]
-genepos[,feature.pos.2 := feature.pos]
-setcolorder(genepos, c("feature", "feature.chr", "feature.pos", "feature.pos.2"))
-setkey(genepos, feature)
+acepos <- fread(acepos.file)
+setnames(acepos, colnames(acepos), c("feature.chr", "start", "end", "feature"))
+acepos[,feature := as.integer(sub("peak", "", feature))]
+acepos[,feature.chr := as.integer(sub("chr", "", feature.chr))]
+acepos[,feature.pos := as.integer((start+end)/2)]
+acepos[,c("start", "end") := NULL]
+acepos[,feature.pos.2 := feature.pos]
+setcolorder(acepos, c("feature", "feature.chr", "feature.pos", "feature.pos.2"))
+setkey(acepos, feature)
 
 # read acetylation data
-patients <- as.integer(colnames(fread(gene.file, skip=0, nrows=0)))
+patients <- as.integer(colnames(fread(ace.file, skip=0, nrows=0)))
 keep.cols <- which(!is.na(match(patients, cvrt[,acetylation.id])))
 
-gene <- fread(gene.file, skip=1, select=c(1, 1+keep.cols))
-setnames(gene, "V1", "feature") 
-setnames(gene, paste0("V", 1+keep.cols), as.character(patients[keep.cols]))
-gene[,feature := as.integer(sub("peak", "", feature))]
-setkey(gene, feature)
-setcolorder(gene, c("feature", as.character(sort(patients[keep.cols]))))
+ace <- fread(ace.file, skip=1, select=c(1, 1+keep.cols))
+setnames(ace, "V1", "feature") 
+setnames(ace, paste0("V", 1+keep.cols), as.character(patients[keep.cols]))
+ace[,feature := as.integer(sub("peak", "", feature))]
+setkey(ace, feature)
+setcolorder(ace, c("feature", as.character(sort(patients[keep.cols]))))
 
-gene <- na.omit(gene)
+ace <- na.omit(ace)
 
-get.all.qtls(gene, genepos, cvrt, "aceQTL")
+get.all.qtls(ace, acepos, cvrt, "aceQTL")
