@@ -1,0 +1,68 @@
+\begin{tikzpicture}
+    [feature/.style={rectangle, draw, minimum height=5mm},
+     cross/.style={cross out, draw, minimum size=2*(#1-\pgflinewidth), 
+     inner sep=0pt, outer sep=0pt},
+     cross/.default={1.2mm}]
+    \coordinate (5prime);
+    \coordinate [right=7cm of 5prime] (3prime);
+    \draw (5prime) -- (3prime);
+    \draw [decorate, decoration={crosses, segment length=7mm, shape size=1.5mm}]
+          (5prime) -- (3prime);
+    \draw [decorate, 
+           decoration={crosses, segment length=12mm, shape size=1.5mm}] 
+          (5prime) -- (3prime);
+    \node [feature, right=1cm of 5prime, fill=blue!50!white] (f1) { };
+    \node [feature, right=4cm of 5prime, fill=red!50!white] (f2) { };
+    \node [feature, right=6cm of 5prime, fill=green!50!white] (f3) { };
+
+    \uncover<2->{
+
+    \coordinate [below=2cm of 5prime] (5prime2);
+    \coordinate [below=2cm of 3prime] (3prime2);
+    \draw (5prime2) -- (3prime2);
+    \draw [decorate, decoration={crosses, segment length=7mm, shape size=1.5mm}]
+          (5prime2) -- (3prime2);
+    \draw [decorate, 
+           decoration={crosses, segment length=12mm, shape size=1.5mm}] 
+          (5prime2) -- (3prime2);
+    \draw [fill=blue!50!white, opacity=0.5] ($(5prime2) + (0.3cm, 0.2cm)$) 
+          rectangle ($(5prime2) + (2cm, -0.2cm)$);
+    \draw [fill=red!50!white, opacity=0.5] ($(5prime2) + (3.3cm, 0.2cm)$) 
+          rectangle ($(5prime2) + (5cm, -0.2cm)$);
+    \draw [fill=green!50!white, opacity=0.5] ($(5prime2) + (5.3cm, 0.2cm)$) 
+          rectangle ($(5prime2) + (7cm, -0.2cm)$);
+    \path (5prime) -- node (mid1) {\Large{$\downarrow$}} (3prime2);
+    \node [right=2mm of mid1, text width=5cm] {SNPs in 200 kb window \\
+    Spearman's $\rho$};
+
+    }\uncover<3->{
+
+    \coordinate [below=2cm of 5prime2] (5prime3);
+    \coordinate [below=2cm of 3prime2] (3prime3);
+    \draw (5prime3) -- (3prime3);
+    \node [feature, right=1cm of 5prime3, fill=blue!50!white] (f1) { };
+    \node [feature, right=4cm of 5prime3, fill=red!50!white] (f2) { };
+    \node [feature, right=6cm of 5prime3, fill=green!50!white] (f3) { };
+    \node [cross, blue, thick] at ($(5prime3) + (7mm, 0mm)$) { };
+    \node [cross, red, thick] at ($(5prime3) + (35mm, 0mm)$) { };
+    \node [cross, green!60!black, thick] at ($(5prime3) + (63mm, 0mm)$) { };
+    \path (5prime2) -- node (mid2) {\Large{$\downarrow$}} (3prime3);
+    \node [right=2mm of mid2, text width=5cm] {Holm-Bonferroni correction \\ best SNP per feature};
+
+    }\uncover<4->{
+
+    \coordinate [below=2cm of 5prime3] (5prime4);
+    \coordinate [below=2cm of 3prime3] (3prime4);
+    \draw (5prime4) -- (3prime4);
+    \node [feature, minimum height=7mm, minimum width=4mm, right=1.15cm of
+    5prime4, anchor=center, fill=blue!50!white] (f1) { };
+    \node [feature, right=4cm of 5prime4, fill=gray] (f2) { };
+    \node [feature, right=5.95cm of 5prime4, minimum height=7mm, minimum width=4mm, fill=green!50!white] (f3) { };
+    \node [cross, cross=1.5mm, blue, very thick] at ($(5prime4) + (7mm, 0mm)$) { };
+    \node [cross, gray] at ($(5prime4) + (35mm, 0mm)$) { };
+    \node [cross, cross=1.5mm, green!60!black, very thick] at ($(5prime4) + (63mm, 0mm)$) { };
+    \path (5prime3) -- node (mid3) {\Large{$\downarrow$}} (3prime4);
+    \node [right=2mm of mid3] {FDR correction};
+
+    }
+\end{tikzpicture}

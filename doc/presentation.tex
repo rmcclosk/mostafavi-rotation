@@ -1,0 +1,283 @@
+\documentclass{beamer}
+\usepackage{tikz}
+\usepackage{hyperref}
+
+\usetikzlibrary{shapes}
+\usetikzlibrary{shapes.misc}
+\usetikzlibrary{positioning}
+\usetikzlibrary{decorations.pathmorphing}
+\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{decorations.shapes}
+\usetikzlibrary{calc}
+\usetikzlibrary{arrows}
+\usetikzlibrary{automata}
+\usetikzlibrary{external}
+
+\tikzexternalize
+
+\title[Omics data integration]{Integrative causality analysis of genetic,
+epigenetic, and transcriptomic data in a large cohort}
+\author[R. McCloskey \& S. Mostafavi]
+    {Rosemary McCloskey and Sara Mostafavi \\\hfill\\
+     \url{rmcclosk.math@gmail.com} \\
+     \url{slideshare.com/blahblahblah}}
+\date{March 27, 2015}
+
+\usetheme{Madrid}
+\usecolortheme[dark]{solarized}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}
+    \frametitle{Motivation}
+    \begin{itemize}
+        \item genetic, epigenetic, and transcriptomic data provide snapshots of
+            cellular processes
+        \uncover<2->{
+        \item usually one data type is studied at a time, in relation to a
+            phenotype or disease
+        }
+    \begin{center}
+        \vspace{-0.5cm}
+        \include{figures/motivation}
+    \end{center}
+        \uncover<3->{
+        \item \textbf{how do these data fit together?}
+        }
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{The data}
+    \begin{columns}
+        \begin{column}{0.35\textwidth}
+            \begin{itemize}
+                \item large cohort designed to study cognitive decline and
+                    Alzheimer's disease
+                \uncover<2->{
+                \item genotype, gene expression, DNA methylation, and histone
+                    acetylation (CHiP-seq) data 
+                }
+                \uncover<3->{
+                \item 392 individuals with all four data types were used for
+                    this analysis
+                }
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.7\textwidth}
+            \include{figures/datatypes_venn}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Quantitative trait loci (QTLs)}
+    \begin{columns}
+        \begin{column}{0.4\textwidth}
+            \begin{itemize}
+                \item a QTL is a genetic locus correlated with a phenotype
+                \uncover<2->{
+                \item we are interested in QTLs for gene expression (eQTLs),
+                    histone acetylation (aceQTLs), and methylation (meQTLs)
+                }
+                \uncover<3->{
+                \item QTLs provide a tool to study interaction between other
+                    molecular phenotypes
+                }
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.65\textwidth}
+            \include{figures/qtl_example}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Identifying QTLs}
+    \begin{center}
+        \tikzexternaldisable
+        \include{figures/multitest}
+        \tikzexternalenable
+    \end{center}
+\end{frame}
+
+\begin{frame}{Removing Principal Components}
+    \begin{columns}
+    \begin{column}{0.4\textwidth}
+        \begin{itemize}
+            \item technical, environmental, and biological covariates can swamp
+                out QTL effects
+            \uncover<2->{
+            \item correct by removing principal components 
+            }\uncover<3->{
+            \item number of peaks with a QTL plateaus at 10 PCs, while genes and
+                CpGs continue to increase
+            }\uncover<4->{
+            \item for this analysis, removed 10 PCs from all data
+            }
+        \end{itemize}
+    \end{column}
+    \begin{column}{0.6\textwidth}
+        \include{figures/qtl_pca}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Identifying multi-QTLs}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+        \begin{itemize}
+            \item By intersecting QTL sets, found 240 gene, CpG, and peak
+                triples which shared the same QTL 
+        \end{itemize}
+        \include{figures/qtl_venn}
+    \end{column}
+    \pause
+    \begin{column}{0.5\textwidth}
+        \begin{itemize}
+            \item Also assessed QTL overlap using $\pi_0$ approach 
+        \end{itemize}
+        \vspace{-0.3cm}
+        \include{figures/qtl_overlap}
+        \vspace{-0.5cm}
+    \end{column}
+\end{columns}
+\end{frame}
+
+\tikzexternaldisable
+\begin{frame}{Bayesian networks}
+    \begin{itemize}
+        \item Bayesian networks are directed graphical models, where the
+            directed edges represent causal relationships
+        \uncover<2-> {
+        \item We use conditional Gaussian networks
+        }
+        \uncover<3-> {
+        \item Score = likelihood of data given network
+        }
+    \end{itemize}
+    \begin{center}
+        \begin{tikzpicture}
+            \node [rectangle, rounded corners, draw, fill=red!30!white] 
+            (t) {temperature};
+            \node [rectangle, rounded corners, draw, fill=blue!30!white,
+            right=2 of t] (p) {precipitation};
+            \draw [->, >=stealth, thick] (t) -- (p);
+
+            \uncover<2-> {
+            \node [below=0.5 of t] (t1) {$\Pr(\text{temp}) \sim N(0, 1)$};
+            \node [below=0.5 of p] (p1) {$\Pr(\text{precip} \mid \text{temp}) \sim N(0, 1)$};
+            }
+
+            \uncover<3-> {
+            \node [below=0.5 of t1] (t2) {$0.7$};
+            \node [below=0.5 of p1] (p2) {$0.5$};
+            }
+
+            \uncover<4-> {
+            \node [below=0.5 of t2] (t3) {$\Pr(N(0, 1) = 0.7)$};
+            \node [below=0.5 of p2] (p3) {$\Pr(N(0.7, 1) = 0.5)$};
+            \path (t3) -- node {$\times$} (p3);
+            }
+        \end{tikzpicture}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Networks for QTLs}
+    \begin{itemize}
+        \item \textit{deal} and \textit{CGBayesNets} packages to construct one
+            Bayesian network for each multi-QTL by exhaustive search
+        \uncover<2->{
+        \item With \textit{deal}, edges into genotype were blacklisted
+        }\uncover<3->{
+        \item Most common network structure was independence
+        }\uncover<4->{
+        \item Accounted for 42\% of \textit{deal} networks, 29\% of
+            \textit{CGBayesNets} networks
+        }
+    \end{itemize}
+    \begin{center}
+        \include{figures/topologies}
+    \end{center}
+\end{frame}
+\tikzexternalenable
+
+\begin{frame}{Future Work}
+    \begin{itemize}
+        \item Expand the number of multi-QTLs
+            \begin{itemize}
+                \item More that just the best SNP per feature
+                \item Identify overlapping QTLs intelligently
+            \end{itemize}
+        \item More rigourous criterion for number of PCs to remove
+        \item Try other packages for network learning (HyPhy)
+        \item Are QTLs enriched in SNPs identified in GWAS studies?
+        \item Correlations with phenotype (cognitive decline etc.)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Thank you!}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \begin{itemize}
+                \item All the bioinformatics students
+                \item Sharon Ruschkowski
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \begin{center}
+                \includegraphics[scale=0.3]{logos/test} \\
+                \includegraphics[scale=0.2]{logos/bioinfo} \\
+                \includegraphics[scale=0.2]{logos/ubc} \\
+                \includegraphics[scale=0.1]{logos/nserc} \\
+                \includegraphics[scale=0.2]{logos/cihr}
+            \end{center}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Software}
+    \begin{columns}
+    \begin{column}{0.4\textwidth}
+    \textbf{QTL analysis}
+    \begin{itemize}
+        \item
+            \href{http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL}
+            {Matrix eQTL}
+        \item
+            \href{http://www.bioconductor.org/packages/release/bioc/html/qvalue.html}
+            {qvalue}
+    \end{itemize}
+    \textbf{Bayesian networks}
+    \begin{itemize}
+        \item \href{http://cran.r-project.org/web/packages/deal/index.html}
+                   {deal}
+        \item \href{http://www.cgbayesnets.com}{CGBayesNets}
+    \end{itemize}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+    \textbf{Slides}
+    \begin{itemize}
+        \item \href{http://www.ctan.org/pkg/beamer}{beamer}
+        \item \href{https://www.ctan.org/pkg/pgf}{TikZ}
+        \item
+            \href{http://cran.r-project.org/web/packages/tikzDevice/index.html}
+            {tikzDevice}
+    \end{itemize}
+    \textbf{Plots}
+    \begin{itemize}
+        \item \href{http://cran.r-project.org/web/packages/pheatmap/index.html}
+                   {pheatmap}
+        \item \href{http://ggplot2.org/}{ggplot2}
+        \item
+            \href{http://cran.r-project.org/web/packages/VennDiagram/index.html}
+            {VennDiagram}
+    \end{itemize}
+    \textbf{Colour Scheme}
+    \begin{itemize}
+        \item \href{http://ethanschoonover.com/solarized}{solarized}
+    \end{itemize}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+\end{document}

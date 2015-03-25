@@ -1,19 +1,4 @@
-\documentclass{article}
-\usepackage[T1]{fontenc}
-\usepackage{garamondx}
-\usepackage[garamondx,cmbraces]{newtxmath}
-\usepackage{tikz}
-
-\usetikzlibrary{positioning}
-\usetikzlibrary{decorations.pathmorphing}
-\usetikzlibrary{decorations.pathreplacing}
-\usetikzlibrary{calc}
-\usetikzlibrary{arrows}
-\usetikzlibrary{automata}
-
-\pagestyle{empty}
-
-\begin{document}
+\definecolor{base3}{HTML}{FDF6E3}
 \begin{tikzpicture}
     \node (g) {GATTACA};
     \draw (g.north west) -- (g.north east);
@@ -23,9 +8,9 @@
     \node [below right= of g.south] (m2) {};
     \draw [decorate, decoration={snake, segment length=6mm, amplitude=2mm}] (m1) -- (m2);
     \draw [decorate, decoration={snake, segment length=6mm, amplitude=2mm, pre length=3mm}] (m1) -- (m2);
-    \node [right=1cm of m1.north, anchor=south, circle, draw, fill=white] (me) { };
+    \node [right=1cm of m1.north, anchor=south, circle, draw, fill=base3] (me) { };
     \node [below right=-0.1 of me.south east, anchor=north west, circle, draw, fill=gray, inner sep=2pt] { };
-    \node [right=1cm of m1.north, anchor=south, circle, draw, fill=white] (me) { };
+    \node [right=1cm of m1.north, anchor=south, circle, draw, fill=base3] (me) { };
     \node [below left=-0.1 of me.south west, anchor=north east, circle, draw, fill=gray, inner sep=2pt] { };
     \node [above=-0.1 of me.north, anchor=south, circle, draw, fill=gray, inner sep=2pt] { };
 
@@ -53,16 +38,17 @@
     \draw [decorate, decoration={ticks, amplitude=0.5mm, segment length=1mm}] (e1) -- (e2);
     \draw [thick] (e1.south east) -- (e2.south west);
 
+    \uncover<3-> {
     \draw [<->, >=stealth, thick, color=red] (e1) -- node [auto, color=red] {\Large{?}} (m2);
     \draw [<->, >=stealth, thick, color=red] ($(e1.south) + (5mm, -2mm)$) -- 
     ($(a2out.east) + (2mm, 0mm)$);
     \path [bend left, draw, <->, >=stealth, thick, color=red] (m2.south) to 
     ($(a2out.north east) + (2mm, 0)$);
+    }
 
     \node [above right=2mm of e1, text width=2cm] {gene \\ expression};
-    \node [left=2mm of m1, fill=white, inner sep=0pt, align=right] {methylation};
-    \node [left=5mm of a1, fill=white, inner sep=0pt, text width=2cm,
+    \node [left=2mm of m1, fill=base3, inner sep=0pt, align=right] {methylation};
+    \node [left=5mm of a1, fill=base3, inner sep=0pt, text width=2cm,
     align=right] {histone \\ acetylation};
-    \node [left=5mm of g.west, fill=white, inner sep=0pt, align=right] {genotype};
+    \node [left=5mm of g.west, fill=base3, inner sep=0pt, align=right] {genotype};
 \end{tikzpicture}
-\end{document}

@@ -1,0 +1,25 @@
+%       [g][e|g][ace|g][me|g] 101
+%    [g][e|g][ace|e:me][me|g]  14
+%      [g][e|g][ace|me][me|g]  13
+%       [g][e|g][ace|e][me|g]  12
+%      [g][e|me][ace|g][me|g]  12
+\begin{tikzpicture}
+    [every node/.style={ellipse, draw, minimum width=8mm},
+     every path/.style={->, >=stealth, thick, draw}]
+    \node [fill=black!20!white] (g) {genotype};
+    \node [fill=red!30!white, left=of g] (e) {expression};
+    \node [fill=green!30!white, right=of g] (a) {acetylation};
+    \node [fill=blue!30!white, below =of g] (m) {methylation};
+
+    \uncover<2>{
+        \draw (e) -- node [-, draw=red, minimum width=4mm, forbidden sign] { } (g);
+        \draw (a) -- node [-, draw=red, minimum width=4mm, forbidden sign] { } (g);
+        \draw (m) -- node [-, draw=red, minimum width=4mm, forbidden sign] { } (g);
+    }
+
+    \uncover<3->{
+        \draw (g) -- (e);
+        \draw (g) -- (a);
+        \draw (g) -- (m);
+    }
+\end{tikzpicture}
