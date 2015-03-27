@@ -1,7 +1,10 @@
-all: presentation.pdf
+all: beamercolorthemesolarized.sty presentation.pdf
+
+beamercolorthemesolarized.sty:
+	wget https://raw.githubusercontent.com/jrnold/beamercolorthemesolarized/master/$@ --no-check-certificate
 
 %.pdf: %.tex
-	pdflatex -shell-escape $^
+	pdflatex -shell-escape $(word 1,$^)
 
 clean:
 	rm -f *.dpth
