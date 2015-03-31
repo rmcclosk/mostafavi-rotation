@@ -15,7 +15,7 @@ load.patients <- function () {
 # "projid"
 # data will be returned for only the patients in id.map
 # id.map can be made by using the function load.patients
-load.mdata <- function (id.map) {
+load.mdata <- function (id.map, ...) {
     mfile <- "../data/ill450kMeth_all_740_imputed.txt"
 
     # the methylation data has patients as columns
@@ -24,7 +24,7 @@ load.mdata <- function (id.map) {
     idx <- which(mpatient %in% id.map[,methylation.id])
     
     # read the data; first column is the CpG ID
-    mdata <- fread(mfile, select=c(1, 1+idx), skip=1)
+    mdata <- fread(mfile, select=c(1, 1+idx), skip=1, ...)
     feature <- mdata[,V1]
     mdata[,V1 := NULL]
 
@@ -41,7 +41,7 @@ load.mdata <- function (id.map) {
 
 # read all the acetylation.data
 # see load.mdata for the meaning of the parameter
-load.adata <- function (id.map) {
+load.adata <- function (id.map, ...) {
     # acetylation data has peaks for rows and patients for columns
     # find the column indices of patients we want
     afile <- "../data/chipSeqResiduals.csv"
@@ -49,7 +49,7 @@ load.adata <- function (id.map) {
     idx <- which(apatients %in% id.map[,projid])
     
     # read the data; the first column in the peak ID
-    adata <- na.omit(fread(afile, skip=1, select=c(1, 1+idx)))
+    adata <- na.omit(fread(afile, skip=1, select=c(1, 1+idx), ...))
     feature <- sub("peak", "", adata[,V1])
     
     # make a matrix with patients as rows and peaks as columns
@@ -60,7 +60,7 @@ load.adata <- function (id.map) {
 
 # read gene expression data
 # see load.mdata for the meaning of the parameter
-load.edata <- function (id.map) {
+load.edata <- function (id.map, ...) {
     # the gene expression data has patients as rows and genes as columns
     efile <- "../data/residual_gene_expression_expressed_genes_2FPKM100ind.txt"
 
@@ -69,12 +69,12 @@ load.edata <- function (id.map) {
     efeature <- as.integer(gsub(".*:ENSG|[.].*", "", efeature))
     
     # read the data
-    edata <- fread(efile, skip=1)
+    edata <- fread(efile, skip=1, ...)
     setnames(edata, "V1", "expression.id")
     
     # since we read in all the patients, delete the ones we're not using
-    setkey(id.map, expression.id)
     setkey(edata, expression.id)
+    setkey(id.map, expression.id)
     edata <- merge(edata, id.map[,"expression.id", with=FALSE])
 
     # now change the IDs in the expression file into projids
@@ -87,8 +87,8 @@ load.edata <- function (id.map) {
     edata
 }
 
-load.manifest <- function () {
-    fread("../data/genotype_manifest.tsv", nrows=10)
+load.manifest <- function (...) {
+    fread("../data/genotype_manifest.tsv", ...)
 }
 
 # read genotype data
@@ -97,32 +97,65 @@ load.manifest <- function () {
 # see load.mdata for the description of the id.map parameter
 load.gdata <- function (manifest, id.map) {
 
-    setkey(manifest, file, column)
+    # get the IDs from the first file
+    gid <- fread(paste0("../data/", manifest[1, file]), select=1, skip=1)[,V1]
+    keep.rows <- na.omit(match(id.map[,genotype.id], gid))
+    gid <- gid[keep.rows]
+    projid <- id.map[match(gid, id.map[,genotype.id]), as.character(projid)]
 
     # go through each file with SNPs we need
-    do.call(cbind, by(manifest, manifest[,file], function (x) {
+    data <- do.call(cbind, by(manifest, manifest[,file], function (x) {
 
         # the genotype data has patients as rows and SNPs as columns
         # read the genotype data from the file, selecting only the needed
         fname <- paste0("../data/", x[1,file])
-        data <- fread(fname, select=c(1, x[,1+column]), skip=1)
-
-        # rename the columns to the SNP IDs
-        setnames(data, "V1", "genotype.id")
-        setnames(data, paste0("V", x[,1+column]), x[,snp])
+        setkey(x, column)
+        snp.cols <- x[,1+column]
+        data <- fread(fname, select=snp.cols, skip=1)
 
         # we read the data for all patients, so keep only those we want
-        setkey(data, genotype.id)
-        setkey(id.map, genotype.id)
-        data <- merge(data, id.map[,"genotype.id",with=FALSE])
-        
-        # change the genotype IDs into project IDs
-        gprojid <- data[,as.character(id.map[genotype.id, projid])]
-        data[,genotype.id := NULL]
+        data <- data[keep.rows,]
 
-        # make a matrix with patients as rows and SNPs as columns
-        data <- as.matrix(data)
-        rownames(data) <- gprojid
-        data
+        # rename the columns to the SNP IDs
+        as.matrix(setnames(data, paste0("V", snp.cols), x[,snp]))
+
     }, simplify=FALSE))
+    rownames(data) <- projid
+    data
+}
+
+# read the list of SNP positions
+load.snps <- function () {
+    snpspos <- fread("../data/snp.txt", drop=3)
+    setnames(snpspos, colnames(snpspos), c("chr", "pos", "snp"))
+    snpspos[,chr := as.integer(sub("chr", "", chr))]
+    setcolorder(snpspos, c("snp", "chr", "pos"))
+}
+
+# read the list of CpG positions
+load.cpgs <- function () {
+    mepos <- fread("../data/cpg.txt", drop=3)
+    setnames(mepos, colnames(mepos), c("chr", "pos", "feature"))
+    mepos[,chr := sub("chr", "", chr)]
+    setcolorder(mepos, c("feature", "chr", "pos"))
+}
+
+# read the list of peak positions
+load.peaks <- function () {
+    acepos <- fread("grep -v [XYK] ../data/peak.txt")
+    setnames(acepos, colnames(acepos), c("chr", "start", "end", "feature"))
+    acepos[,feature := as.integer(sub("peak", "", feature))]
+    acepos[,chr := as.integer(sub("chr", "", chr))]
+    acepos[,pos := as.integer((start+end)/2)]
+    acepos[,c("start", "end") := NULL]
+    setcolorder(acepos, c("feature", "chr", "pos"))
+}
+
+# read the list of genes
+load.genes <- function () {
+    genepos <- fread("../data/ensemblGenes.tsv", drop=2)
+    setnames(genepos, colnames(genepos), c("feature", "chr", "start", "end", "fwd"))
+    genepos[,pos := ifelse(fwd, start, end)]
+    genepos[,c("start", "end", "fwd") := NULL]
+    setcolorder(genepos, c("feature", "chr", "pos"))
 }
