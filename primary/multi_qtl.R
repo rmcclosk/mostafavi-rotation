@@ -6,36 +6,24 @@ library(data.table)
 
 # this may need to be changed in future depending on how many PCs we want to
 # remove
-vars <- c(".PC10", ".PC10", ".PC10")
+qtl.types <- c("e", "ace", "me")
+data.use <- c("PC10", "PC10", "PC2")
 
-files <- paste0(c("e", "ace", "me"), "QTL/best.tsv")
-data <- mapply(function (f, v) {
+files <- file.path(paste0(qtl.types, "QTL"), paste0(data.use, ".best.tsv"))
+data <- lapply(files, fread)
 
-    # read the data, and keep only the columns we want
-    keep.cols <- c("feature", "snp", paste0("q.value", v), paste0("adj.p.value", v))
-    res <- fread(f, select=keep.cols)
-    setnames(res, paste0("q.value", v), "q.value")
-    setnames(res, paste0("adj.p.value", v), "adj.p.value")
+# get best feature per significant SNP
+data <- lapply(data, setkey, snp, q.value) # sort by q-value per snp
+data <- lapply(data, setkey, snp) # remove q-value key (order is the same)
+data <- lapply(data, unique) # select lowest q-value feature per snp
+data <- lapply(data, subset, q.value < 0.05) # drop non-significant associations
 
-    # get the best SNP per feature
-    setkey(res, feature, adj.p.value)
-    res <- res[,.SD[1], feature]
-
-    # if a SNP is associated to multiple features, keep only the best one
-    setkey(res, snp, q.value)
-    res <- res[,.SD[1], by=snp]
-
-    # drop all insignificant associations
-    res <- res[q.value < 0.05,]
-
-    # make a new table for each data type
-    # eg. for eQTLs, the columns will be snp, feature.e, and q.value.e
-    data.type <- sub("QTL.*", "", f)
-    setnames(res, "q.value", paste0("q.value.", data.type))
-    setnames(res, "feature", paste0("feature.", data.type))
-    setkey(res, snp)
-}, files, vars, SIMPLIFY=FALSE)
+# rename columns
+old.colnames <- lapply(data, colnames)
+old.colnames <- mapply(grep, "snp", old.colnames, value=TRUE, invert=TRUE, SIMPLIFY=FALSE)
+new.colnames <- mapply(paste0, old.colnames, ".", qtl.types, SIMPLIFY=FALSE)
+data <- mapply(setnames, data, old.colnames, new.colnames, SIMPLIFY=FALSE)
 
 # combine QTLs from all data types
-multi.qtls <- Reduce(merge, data)
-write.table(multi.qtls, "multi_qtl.tsv", row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")
+data <- Reduce(merge, data)
+write.table(data, "multi_qtl.tsv", row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")

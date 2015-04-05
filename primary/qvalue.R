@@ -4,7 +4,6 @@
 
 library(data.table)
 library(qvalue)
-library(parallel)
 
 dir <- commandArgs(trailingOnly=TRUE)[2]
 dir <- gsub("/", "", dir)
@@ -13,54 +12,30 @@ if (!dir %in% c("eQTL", "meQTL", "aceQTL")) {
     quit()
 }
 
-data.types <- c("", ".nocov", paste0(".PC", 1:20))
+data.types <- c("PC0.nocov", paste0("PC", 0:20))
 
-files <- file.path(dir, paste0("chr", 1:22, ".tsv"))
+files <- file.path(dir, paste0(data.types, ".tsv"))
+files <- files[file.exists(files)]
 
-## read data
-#lapply(files, function (f) {
-#    data <- fread(f)
-#    setkey(data, feature, snp)
-#    
-#    # adjust p-values for each feature separately
-#    sapply(data.types, function (x) {
-#        setnames(data, paste0("p.value", x), "p")
-#        data[,adj.p := p.adjust(p, method="holm"), by=feature]
-#
-#        setnames(data, "adj.p", paste0("adj.p.value", x))
-#        setnames(data, "p", paste0("p.value", x))
-#    })
-#
-#    # take only the best SNP per feature
-#    res <- rbindlist(lapply(data.types, function (x) {
-#        setkeyv(data, c("feature", paste0("adj.p.value", x)))
-#        data[,.SD[1], feature]
-#    }))
-#    write.table(res, paste0(f, ".qvalue"), row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")
-#    rm(data)
-#    rm(res)
-#    gc()
-#})
-#
-#gc()
-drops <- c(paste0("p.value", data.types), paste0("t.stat", data.types))
-data <- rbindlist(lapply(paste0(files, ".qvalue"), fread, drop=drops))
+# read data
+lapply(files, function (f) {
+    cat("Processing file", f, "\n")
+    
+    data <- fread(f)
+    setkey(data, feature, p.value)
+    
+    # adjust p-values for each feature separately
+    data[,adj.p.value := p.adjust(p.value, method="holm"), by=feature]
 
-setkey(data, feature)
-snp.counts <- data[,length(snp), feature][,V1]
+    # take only the best SNP per feature
+    data <- data[,.SD[1], feature]
 
-# calculate q-values per feature
-sapply(data.types, function (x) {
-    setnames(data, paste0("adj.p.value", x), "adj.p")
+    # calculate q-values per feature
+    min.p.value <- data[,min(adj.p.value), by=feature][,V1]
+    data[,q.value := qvalue(min.p.value, robust=TRUE)$qvalue]
 
-    min.p.value <- data[,min(adj.p), by=feature][,V1]
-    data[,q := rep(qvalue(min.p.value, robust=TRUE)$qvalue, snp.counts)]
-
-    setnames(data, "q", paste0("q.value", x))
-    setnames(data, "adj.p", paste0("adj.p.value", x))
-    NULL
+    outfile <- sub(".tsv", ".best.tsv", f)
+    write.table(data, outfile, row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")
+    rm(data)
+    gc()
 })
-
-# combine best SNPs
-data <- unique(setkey(data, feature, snp))
-write.table(data, paste0(dir, "/best.tsv"), row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")
