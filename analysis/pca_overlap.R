@@ -4,31 +4,29 @@
 
 library(data.table)
 library(ggplot2)
+library(reshape2)
 
-data.types <- c("e", "ace", "me")
-data.labels <- c("expression", "acetylation", "methylation")
-keep.cols <- c("feature", "q.value", paste0("q.value.PC", 1:20))
+keeps <- c("feature", "q.value")
+files <- sprintf("../primary/%sQTL/PC%%d.best.tsv", c("e", "ace", "me"))
+files <- lapply(files, sprintf, 0:20)
 
-files <- sprintf("../primary/%sQTL/best.tsv", data.types)
-data <- lapply(files, function (x) setnames(fread(x), "q.value", "q.value.PC0"))
+data <- lapply(files, lapply, fread, select=keeps)
+data <- lapply(data, lapply, setkey, feature, q.value)
+data <- lapply(data, lapply, setkey, feature)
+data <- lapply(data, lapply, unique)
+data <- lapply(data, lapply, "[", i=q.value < 0.05, j=feature)
+names(data) <- c("genes", "peaks", "CpGs")
 
-pc.data <- rbindlist(lapply(1:length(data.types), function (i) {
-    rbindlist(lapply(1:20, function (x) {
-        prev.col <- paste0("q.value.PC", x-1)
-        cur.col <- paste0("q.value.PC", x)
-        d <- data[[i]]
-    
-        f.prev <- d[which(d[[prev.col]] < 0.05), unique(feature)]
-        f.cur <- d[which(d[[cur.col]] < 0.05), unique(feature)]
-        data.table(pc.rm=x,
-                   difference=c("found", "dropped"),
-                   qtls=c(length(setdiff(f.cur, f.prev)),
-                          length(setdiff(f.prev, f.cur))),
-                   data.type=data.labels[i])
-    }))
-}))
+found <- lapply(data, function (x) sapply(mapply(setdiff, tail(x, -1), head(x, -1), SIMPLIFY=FALSE), length))
+dropped <- lapply(data, function (x) sapply(mapply(setdiff, head(x, -1), tail(x, -1), SIMPLIFY=FALSE), length))
+data <- list(found, dropped)
+data <- lapply(data, as.data.frame)
+data <- mapply(cbind, data, difference=c("found", "dropped"), SIMPLIFY=FALSE)
+data <- lapply(data, cbind, pc.rm=1:20)
+data <- as.data.frame(do.call(rbind, data))
+data <- melt(data, id.vars=c("pc.rm", "difference"), variable.name="data.type", value.name="qtls")
 
-p <- ggplot(pc.data, aes(x=pc.rm, y=qtls, color=difference)) +
+p <- ggplot(data, aes(x=pc.rm, y=qtls, color=difference)) +
      geom_point() +
      geom_line() +
      theme_bw() +
