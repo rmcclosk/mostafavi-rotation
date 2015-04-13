@@ -47,5 +47,6 @@ plots of the 3 continuous phenotypes out of these 5.
 __multi_qtl.R__: Find a set of multi-QTLs by intersecting the sets of eQTLs,
 aceQTLs, and meQTLs. Store the results in results/multi_qtl.tsv.
 
-__imputation.R__: Creates plots/imputation.pdf, which shows the number of SNPs
-without integer data.
+__pair_table.R__: Creates tables/pair_table.md, which gives the number of
+significantly correlated features between each pair of data types.
+

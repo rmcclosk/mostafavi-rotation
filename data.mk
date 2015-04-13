@@ -1,5 +1,7 @@
 # This is the Makefile that creates everything in the data/ directory
 
+SHELL=/bin/bash
+
 data: $(addprefix data/,cpg.txt \
 	snp.txt \
 	ensemblGenes.tsv \
@@ -43,7 +45,7 @@ data/ensemblGenes.tsv:
 
 data/cpg.txt: data/hg19ToHg38.over.chain.gz
 	liftOver <(wget -O - ftp://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibMethyl450/supplemental/wgEncodeHaibMethyl450CpgIslandDetails.txt | tail -n +9 | grep '^[c]' | awk -F ',' '{print "chr"$$12"\t"$$13"\t"$$13+1"\t"$$1}') $(word 1, $^) $@ /dev/null
-	sed -i '/[XYK]/d' $@
+	sed -i -e '/[XYK]/d' -e '/random/d' $@
 
 data/transposed_1kG:
 	ln -s /broad/dejagerlab/cogdec/GWAS/ROSMAP/scripts/reformat_dosage_1kg_all_chrs/$(notdir $@) $@

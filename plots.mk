@@ -3,7 +3,8 @@ plots: densities \
 						  phenotypes.png \
 						  pca_overlap.png \
 						  validate_genes.png \
-						  validate_snps.png)
+						  validate_snps.png \
+						  imputation.png)
 
 densities: $(patsubst %,plots/phenotypes/%.png,amyloid_sqrt globcog_random_slope tangles_sqrt)
 

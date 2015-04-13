@@ -7,8 +7,12 @@ QTL_BASE = $(patsubst %,PC%,0.nocov 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 
 QTL_RAW = $(foreach DIR,$(QTL_FOLDERS),$(foreach BASE,$(QTL_BASE),$(DIR)/$(BASE).tsv))
 QTL_BEST = $(foreach DIR,$(QTL_FOLDERS),$(foreach BASE,$(QTL_BASE),$(DIR)/$(BASE).best.tsv))
 
-results: $(addprefix results/,multi_qtl_data.tsv \
-							  ace_e_pairs.tsv)
+PAIRS_BEST = $(addsuffix .tsv, $(addprefix results/pairs/, ace_e ace_me e_ace e_me me_ace me_e))
+
+results: $(addprefix results/,multi_qtl_data.tsv) $(PAIRS_BEST)
+
+results/pairs/%.tsv: scripts/pairs_qvalue.R 
+	$^ --args $(wordlist 1, 2, $(subst _, , $(patsubst %.tsv, %, $(notdir $@))))
 
 results/%pairs.tsv: scripts/pairs.R
 	$^ --args $(wordlist 1, 2, $(subst _, , $(notdir $@)))
