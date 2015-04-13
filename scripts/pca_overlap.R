@@ -7,7 +7,7 @@ library(ggplot2)
 library(reshape2)
 
 keeps <- c("feature", "q.value")
-files <- sprintf("../primary/%sQTL/PC%%d.best.tsv", c("e", "ace", "me"))
+files <- sprintf(file.path("results", "%sQTL", "PC%%d.best.tsv"), c("e", "ace", "me"))
 files <- lapply(files, sprintf, 0:20)
 
 data <- lapply(files, lapply, fread, select=keeps)
@@ -34,10 +34,10 @@ p <- ggplot(data, aes(x=pc.rm, y=qtls, color=difference)) +
      xlab("PCs removed") +
      ylab("significant features")
 
-png("pca_overlap.png")
+png(file.path("plots", "pca_overlap.png"))
 print(p)
 dev.off()
 
-pdf("pca_overlap.pdf")
+pdf(file.path("plots", "pca_overlap.pdf"))
 print(p)
 dev.off()

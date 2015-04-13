@@ -7,9 +7,9 @@ library(data.table)
 # this may need to be changed in future depending on how many PCs we want to
 # remove
 qtl.types <- c("e", "ace", "me")
-data.use <- c("PC10", "PC10", "PC2")
+data.use <- c("PC10", "PC10", "PC4")
 
-files <- file.path(paste0(qtl.types, "QTL"), paste0(data.use, ".best.tsv"))
+files <- file.path("results", paste0(qtl.types, "QTL"), paste0(data.use, ".best.tsv"))
 data <- lapply(files, fread)
 
 # get best feature per significant SNP
@@ -26,4 +26,4 @@ data <- mapply(setnames, data, old.colnames, new.colnames, SIMPLIFY=FALSE)
 
 # combine QTLs from all data types
 data <- Reduce(merge, data)
-write.table(data, "multi_qtl.tsv", row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")
+write.table(data, file.path("results", "multi_qtl.tsv"), row.names=FALSE, col.names=TRUE, quote=FALSE, sep="\t")

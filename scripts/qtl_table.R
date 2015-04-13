@@ -5,56 +5,41 @@
 library(data.table)
 library(knitr)
 
-median.iqr <- function (x) {
-    sprintf("%.2g [%.2g-%.2g]", median(x), quantile(x, 0.25), quantile(x, 0.75))
-}
+source(file=file.path("utils", "misc.R"))
 
+# get information about tests done
 keeps <- c("feature", "snp")
-edata <- rbindlist(lapply(paste0("eQTL/chr", 1:22, ".tsv"), fread, select=keeps))
-mdata <- rbindlist(lapply(paste0("meQTL/chr", 1:22, ".tsv"), fread, select=keeps))
-adata <- rbindlist(lapply(paste0("aceQTL/chr", 1:22, ".tsv"), fread, select=keeps))
+data.types <- c("e", "ace", "me")
+data.files <- sprintf(file.path("results", "%sQTL", "PC0.tsv"), data.types)
+data <- lapply(data.files, fread, select=keeps)
 
-raw.stats <- function (data) {
-    c(`features tested`=data[,length(unique(feature))],
-      `SNPs tested`=data[,length(unique(snp))],
-      `total tests done`=nrow(data),
-      `SNPs per feature`=median.iqr(data[,length(snp),by=feature][,V1]),
-      `features per SNP`=median.iqr(data[,length(feature),by=snp][,V1]))
-}
-data <- list(edata, mdata, adata)
-raw.data <- do.call(cbind, lapply(data, raw.stats))
-colnames(raw.data) <- c("eQTL", "meQTL", "aceQTL")
-tbl <- as.data.frame(raw.data)
+tbl <- data.frame(`features tested`=sapply(data, "[", j=length(unique(feature))))
+tbl$`SNPs tested` <- sapply(data, "[", j=length(unique(snp)))
+tbl$`total tests done` <- sapply(data, nrow)
+
+snps.by.feature <- lapply(data, "[", j=length(snp), by=feature)
+snps.by.feature <- lapply(snps.by.feature, "[", j=V1)
+tbl$`SNPs per feature` <- sapply(snps.by.feature, median.iqr)
+
+features.by.snp <- lapply(data, "[", j=length(feature), by=snp)
+features.by.snp <- lapply(features.by.snp, "[", j=V1)
+tbl$`features per SNP` <- sapply(features.by.snp, median.iqr)
 
 rm(data)
-rm(edata)
-rm(mdata)
-rm(adata)
-gc()
 
-ebest <- fread("eQTL/best.tsv")
-mbest <- fread("meQTL/best.tsv")
-abest <- fread("aceQTL/best.tsv")
+# get information about discoveries
+best.files <- sprintf(file.path("results", "%sQTL", "PC0.best.tsv"), data.types)
+best <- lapply(best.files, fread)
 
-best.stats <- function (data) {
-    setkey(data, feature, adj.p.value)
-    dcov <- data[,.SD[1], feature]
-    stopifnot(nrow(dcov) == length(unique(data[,feature])))
+tbl$`significant features` <- sapply(best, "[", j=sum(q.value < 0.05))
+tbl$`regression slope (β)` <- sapply(best, "[", i=which(q.value < 0.05), j=median.iqr(rho))
 
-    setkey(data, feature, adj.p.value.nocov)
-    dnocov <- data[,.SD[1], feature]
-    stopifnot(nrow(dnocov) == length(unique(data[,feature])))
+best.files <- sprintf(file.path("results", "%sQTL", "PC0.nocov.best.tsv"), data.types)
+best <- lapply(best.files, fread)
 
-    c(`significant features`=dcov[,sum(q.value < 0.05)],
-      `Spearman's rho`=median.iqr(dcov[q.value < 0.05, rho]),
-      `significant features (no cov.)`=dnocov[,sum(q.value.nocov < 0.05)],
-      `Spearman's rho (no cov.)`=median.iqr(dnocov[q.value.nocov < 0.05, rho.nocov]))
-}
-data <- list(ebest, mbest, abest)
-best.data <- do.call(cbind, lapply(data, best.stats))
-colnames(best.data) <- c("eQTL", "meQTL", "aceQTL")
-#tbl <- kable(best.data, "markdown")
-#cat(tbl, file="qtl_table.md", sep="\n")
-tbl <- rbind(tbl, best.data)
-kbl <- kable(tbl, "markdown")
-cat(kbl, file="qtl_table.md", sep="\n")
+tbl$`significant features (no cov.)` <- sapply(best, "[", j=sum(q.value < 0.05))
+tbl$`Spearman's ρ` <- sapply(best, "[", i=which(q.value < 0.05), j=median.iqr(rho))
+
+tbl <- t(sapply(tbl, as.character))
+colnames(tbl) <- sprintf("%sQTL", data.types)
+kable(tbl, "markdown")

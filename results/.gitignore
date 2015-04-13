@@ -1,5 +1,4 @@
-multi_qtl.tsv
-multi_qtl_data.tsv
+*.tsv
 eQTL/
 aceQTL/
 meQTL/

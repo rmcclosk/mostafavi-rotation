@@ -6,7 +6,7 @@ library(data.table)
 
 # load the patient data
 load.patients <- function () {
-    pfile <- "../data/patients.tsv"
+    pfile <- file.path("data", "patients.tsv")
     fread(pfile)[which(use.for.qtl)]
 }
 
@@ -16,7 +16,7 @@ load.patients <- function () {
 # data will be returned for only the patients in id.map
 # id.map can be made by using the function load.patients
 load.mdata <- function (id.map, ...) {
-    mfile <- "../data/ill450kMeth_all_740_imputed.txt"
+    mfile <- file.path("data", "ill450kMeth_all_740_imputed.txt")
 
     # the methylation data has patients as columns
     # find the column indices for patients we want
@@ -44,7 +44,7 @@ load.mdata <- function (id.map, ...) {
 load.adata <- function (id.map, ...) {
     # acetylation data has peaks for rows and patients for columns
     # find the column indices of patients we want
-    afile <- "../data/chipSeqResiduals.csv"
+    afile <- file.path("data", "chipSeqResiduals.csv")
     apatients <- as.integer(strsplit(gsub('"', "", readLines(afile, n=1)), "\t")[[1]])
     idx <- which(apatients %in% id.map[,projid])
     
@@ -62,7 +62,7 @@ load.adata <- function (id.map, ...) {
 # see load.mdata for the meaning of the parameter
 load.edata <- function (id.map, ...) {
     # the gene expression data has patients as rows and genes as columns
-    efile <- "../data/residual_gene_expression_expressed_genes_2FPKM100ind.txt"
+    efile <- file.path("data", "residual_gene_expression_expressed_genes_2FPKM100ind.txt")
 
     # get the gene IDs from the column names
     efeature <- tail(strsplit(readLines(efile, n=1), "\t")[[1]], -1)
@@ -88,7 +88,7 @@ load.edata <- function (id.map, ...) {
 }
 
 load.manifest <- function (...) {
-    fread("../data/genotype_manifest.tsv", ...)
+    fread(file.path("data", "genotype_manifest.tsv"), ...)
 }
 
 # read genotype data
@@ -98,35 +98,38 @@ load.manifest <- function (...) {
 load.gdata <- function (manifest, id.map) {
 
     # get the IDs from the first file
-    gid <- fread(paste0("../data/", manifest[1, file]), select=1, skip=1)[,V1]
+    gid <- fread(manifest[1, file], select=1, skip=1)[,V1]
     keep.rows <- na.omit(match(id.map[,genotype.id], gid))
     gid <- gid[keep.rows]
     projid <- id.map[match(gid, id.map[,genotype.id]), as.character(projid)]
 
     # go through each file with SNPs we need
+    pb <- txtProgressBar(min=0, max=nrow(manifest), style=3, file=stderr())
     data <- do.call(cbind, by(manifest, manifest[,file], function (x) {
 
         # the genotype data has patients as rows and SNPs as columns
         # read the genotype data from the file, selecting only the needed
-        fname <- paste0("../data/", x[1,file])
         setkey(x, column)
         snp.cols <- x[,1+column]
-        data <- fread(fname, select=snp.cols, skip=1)
+        data <- fread(x[1, file], select=snp.cols, skip=1)
 
         # we read the data for all patients, so keep only those we want
         data <- data[keep.rows,]
+
+        setTxtProgressBar(pb, getTxtProgressBar(pb) + nrow(x))
 
         # rename the columns to the SNP IDs
         as.matrix(setnames(data, paste0("V", snp.cols), x[,snp]))
 
     }, simplify=FALSE))
     rownames(data) <- projid
+    close(pb)
     data
 }
 
 # read the list of SNP positions
 load.snps <- function () {
-    snpspos <- fread("../data/snp.txt", drop=3)
+    snpspos <- fread(file.path("data", "snp.txt"), drop=3)
     setnames(snpspos, colnames(snpspos), c("chr", "pos", "snp"))
     snpspos[,chr := as.integer(sub("chr", "", chr))]
     setcolorder(snpspos, c("snp", "chr", "pos"))
@@ -134,7 +137,7 @@ load.snps <- function () {
 
 # read the list of CpG positions
 load.cpgs <- function () {
-    mepos <- fread("../data/cpg.txt", drop=3)
+    mepos <- fread(file.path("data", "cpg.txt"), drop=3)
     setnames(mepos, colnames(mepos), c("chr", "pos", "feature"))
     mepos[,chr := sub("chr", "", chr)]
     setcolorder(mepos, c("feature", "chr", "pos"))
@@ -142,7 +145,7 @@ load.cpgs <- function () {
 
 # read the list of peak positions
 load.peaks <- function () {
-    acepos <- fread("grep -v [XYK] ../data/peak.txt")
+    acepos <- fread(file.path("data", "peak.txt"))
     setnames(acepos, colnames(acepos), c("chr", "start", "end", "feature"))
     acepos[,feature := as.integer(sub("peak", "", feature))]
     acepos[,chr := as.integer(sub("chr", "", chr))]
@@ -153,7 +156,7 @@ load.peaks <- function () {
 
 # read the list of genes
 load.genes <- function () {
-    genepos <- fread("../data/ensemblGenes.tsv", drop=2)
+    genepos <- fread(file.path("data", "ensemblGenes.tsv"), drop=2)
     setnames(genepos, colnames(genepos), c("feature", "chr", "start", "end", "fwd"))
     genepos[,pos := ifelse(fwd, start, end)]
     genepos[,c("start", "end", "fwd") := NULL]

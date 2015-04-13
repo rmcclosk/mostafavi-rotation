@@ -6,3 +6,11 @@
 *.log
 nohup.out
 __pycache__
+*.auxlock
+*.nav
+*.out
+*.snm
+*.toc
+*.orig
+*.bk
+bsub.sh
