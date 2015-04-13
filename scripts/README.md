@@ -53,3 +53,10 @@ significantly correlated features between each pair of data types.
 __qtl_overlap.R__: Creates plots/qtl_overlap.png, plots/*qtl_venn.png, and
 tables/qtl_overlap.md. These all quantify the proportion of overlapping QTLs
 by pi1, that is, by applying the two step multiple testing procedure. 
+
+__non_int_snps.R__: Creates plots/non_int_snps.png, which shows the
+distribution of non-integer counts among SNPs on the Affy6 array manifest.
+
+__non_int_patients.R__: Creates plots/non_int_patients.png, which shows the 
+distribution of non-integer counts by SNP among patients (like above, except
+instead of counts of patients per SNP, it's counts of SNPs per patient).
