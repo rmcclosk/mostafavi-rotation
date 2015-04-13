@@ -15,7 +15,7 @@ load.patients <- function () {
 # "projid"
 # data will be returned for only the patients in id.map
 # id.map can be made by using the function load.patients
-load.mdata <- function (id.map, ...) {
+load.mdata <- function (id.map=load.patients(), cpgs=load.cpgs(), ...) {
     mfile <- file.path("data", "ill450kMeth_all_740_imputed.txt")
 
     # the methylation data has patients as columns
@@ -25,8 +25,11 @@ load.mdata <- function (id.map, ...) {
     
     # read the data; first column is the CpG ID
     mdata <- fread(mfile, select=c(1, 1+idx), skip=1, ...)
-    feature <- mdata[,V1]
-    mdata[,V1 := NULL]
+    mfeature <- mdata[,V1]
+
+    # keep only the features we need
+    keeps <- na.omit(cpgs[,match(feature, mfeature)])
+    mdata <- mdata[,V1 := NULL][keeps,]
 
     # set the column names to the patient IDs
     setkey(id.map, methylation.id)
@@ -35,13 +38,15 @@ load.mdata <- function (id.map, ...) {
 
     # make a matrix with patients as rows and CpGs as columns
     mdata <- t(mdata)
-    colnames(mdata) <- feature
+    colnames(mdata) <- mfeature[keeps]
     mdata
 }
 
 # read all the acetylation.data
 # see load.mdata for the meaning of the parameter
-load.adata <- function (id.map, ...) {
+# peaks is a data.table with at least the column "feature" which tells us which
+# peaks to load
+load.adata <- function (id.map=load.patients(), peaks=load.peaks(), ...) {
     # acetylation data has peaks for rows and patients for columns
     # find the column indices of patients we want
     afile <- file.path("data", "chipSeqResiduals.csv")
@@ -50,26 +55,33 @@ load.adata <- function (id.map, ...) {
     
     # read the data; the first column in the peak ID
     adata <- na.omit(fread(afile, skip=1, select=c(1, 1+idx), ...))
-    feature <- sub("peak", "", adata[,V1])
+    afeature <- sub("peak", "", adata[,V1])
+
+    # take only the peaks we need
+    keeps <- na.omit(peaks[,match(feature, afeature)])
     
     # make a matrix with patients as rows and peaks as columns
-    adata <- t(adata[,V1 := NULL])
-    dimnames(adata) <- list(apatients[idx], feature)
+    adata <- t(adata[,V1 := NULL][keeps,])
+    dimnames(adata) <- list(apatients[idx], afeature[keeps])
     adata
 }
 
 # read gene expression data
-# see load.mdata for the meaning of the parameter
-load.edata <- function (id.map, ...) {
+# see load.mdata for the meaning of the id.map parameter
+# genes is a data.table with at least the column "feature" indicating which
+# genes to load
+load.edata <- function (id.map=load.patients(), genes=load.genes(), ...) {
     # the gene expression data has patients as rows and genes as columns
     efile <- file.path("data", "residual_gene_expression_expressed_genes_2FPKM100ind.txt")
 
     # get the gene IDs from the column names
     efeature <- tail(strsplit(readLines(efile, n=1), "\t")[[1]], -1)
     efeature <- as.integer(gsub(".*:ENSG|[.].*", "", efeature))
+    keeps <- sort(na.omit(genes[,match(feature, efeature)]))
+    efeature <- efeature[keeps]
     
     # read the data
-    edata <- fread(efile, skip=1, ...)
+    edata <- fread(efile, skip=1, select=c(1, 1+keeps), ...)
     setnames(edata, "V1", "expression.id")
     
     # since we read in all the patients, delete the ones we're not using
@@ -95,7 +107,7 @@ load.manifest <- function (...) {
 # manifest is a data.table with at least the columns file, snp, and column
 # it can be produced by load.manifest
 # see load.mdata for the description of the id.map parameter
-load.gdata <- function (manifest, id.map) {
+load.gdata <- function (manifest, id.map=load.patients()) {
 
     # get the IDs from the first file
     gid <- fread(manifest[1, file], select=1, skip=1)[,V1]
@@ -109,17 +121,18 @@ load.gdata <- function (manifest, id.map) {
 
         # the genotype data has patients as rows and SNPs as columns
         # read the genotype data from the file, selecting only the needed
-        setkey(x, column)
-        snp.cols <- x[,1+column]
-        data <- fread(x[1, file], select=snp.cols, skip=1)
+        tmp <- copy(x)
+        setkey(tmp, column)
+        snp.cols <- tmp[,1+column]
+        data <- fread(tmp[1, file], select=snp.cols, skip=1)
 
         # we read the data for all patients, so keep only those we want
         data <- data[keep.rows,]
 
-        setTxtProgressBar(pb, getTxtProgressBar(pb) + nrow(x))
+        setTxtProgressBar(pb, getTxtProgressBar(pb) + nrow(tmp))
 
         # rename the columns to the SNP IDs
-        as.matrix(setnames(data, paste0("V", snp.cols), x[,snp]))
+        as.matrix(setnames(data, paste0("V", snp.cols), tmp[,snp]))
 
     }, simplify=FALSE))
     rownames(data) <- projid

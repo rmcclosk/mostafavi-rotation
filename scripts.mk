@@ -35,3 +35,7 @@ scripts/imputation.R: utils/load_data.R
 scripts/pairs_qvalue.R: $(PAIRS_RAW)
 
 scripts/pair_table.R: utils/load_data.R
+
+scripts/missing.R: utils/load_data.R
+
+scripts/non_int_snps.R: utils/load_data.R

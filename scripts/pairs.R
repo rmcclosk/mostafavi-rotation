@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
 
-# Analysis of CpG-gene pairs (CGP), lysine-gene pairs (LGP), and CpG-lysine pairs (CLP)
+# Compute raw pairwise correlations between methylation, acetylation, and
+# expression.
 
 library(data.table)
 
@@ -34,6 +35,6 @@ data1 <- data.fun[[data.types[1]]](patients)
 data2 <- data.fun[[data.types[2]]](patients)
 
 header <- c(paste0("feature.", data.types), "rho", "t.stat", "p.value")
-header <- paste(header, sep="\t")
+header <- paste(header, collapse="\t")
 cat(header, "\n", file=outfile)
 get.all.pairs(data1, data1pos, data2, data2pos, pc.rm[data.types], cvrt, outfile)
