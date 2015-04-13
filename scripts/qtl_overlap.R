@@ -14,10 +14,10 @@ library(pryr)
 sol <- solarized.Colours(variant = "srgb")
 
 data.types <- c("e", "ace", "me")
-data.use <- c("PC10", "PC10", "PC10")
+data.use <- c(e="PC10", ace="PC10", me="PC10")
 
-best.file <- "../primary/%sQTL/%s.best.tsv"
-data.file <- "../primary/%sQTL/%s.tsv"
+best.file <- file.path("results", "%sQTL", "%s.best.tsv")
+data.file <- file.path("results", "%sQTL", "%s.tsv")
 
 best <- lapply(sprintf(best.file, data.types, data.use), fread, select=c("snp", "q.value"))
 
@@ -72,11 +72,11 @@ names(overlap) <- rep(qtl.names, each=length(qtl.names))
 
 overlap.size <- matrix(sapply(overlap, length), nrow=length(data.types))
 dimnames(overlap.size) <- list(qtl.names, qtl.names)
-cat(kable(overlap.size, "markdown"), file="qtl_overlap.md", sep="\n")
+cat(kable(overlap.size, "markdown"), file=file.path("tables", "qtl_overlap.md"), sep="\n")
 
 overlap.prop <- round(overlap.size*100/diag(overlap.size))
 
-png("qtl_overlap.png")
+png(file.path("plots", "qtl_overlap.png"))
 pheatmap(overlap.prop, cluster_rows=FALSE, cluster_cols=FALSE, 
          legend=FALSE, fontsize=18, fontsize_number=18, 
          display_numbers=TRUE,
@@ -84,7 +84,7 @@ pheatmap(overlap.prop, cluster_rows=FALSE, cluster_cols=FALSE,
          number_format="%.0f %%")
 dev.off()
 
-tikz("qtl_overlap.tex", width=2.5, height=2.5, fg=sol$base00, bg=sol$base3)
+tikz(file.path("plots", "qtl_overlap.tex"), width=2.5, height=2.5, fg=sol$base00, bg=sol$base3)
 pheatmap(round(overlap.prop), cluster_rows=FALSE, cluster_cols=FALSE, 
          legend=FALSE, display_numbers=TRUE,
          color=colorRampPalette(c(sol$base2, sol$orange))(100),
@@ -120,19 +120,19 @@ do.venn <- function (sets) {
     do.call(match.fun(venn.funs[length(sets)]), venn.args)
 }
 
-png("eqtl_venn.png", width=240, height=240)
+png(file.path("plots", "eqtl_venn.png"), width=240, height=240)
 sets <- list(overlap[[1]], overlap[[4]], overlap[[7]])
 names(sets) <- names(overlap)[c(1,4,7)]
 grid.draw(do.venn(sets))
 dev.off()
 
-png("aceqtl_venn.png", width=240, height=240)
+png(file.path("plots", "aceqtl_venn.png"), width=240, height=240)
 sets <- list(overlap[[2]], overlap[[5]], overlap[[8]])
 names(sets) <- names(overlap)[c(2,5,8)]
 grid.draw(do.venn(sets))
 dev.off()
 
-png("meqtl_venn.png", width=240, height=240)
+png(file.path("plots", "meqtl_venn.png"), width=240, height=240)
 sets <- list(overlap[[3]], overlap[[6]], overlap[[9]])
 names(sets) <- names(overlap)[c(3,6,9)]
 grid.draw(do.venn(sets))

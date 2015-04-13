@@ -50,3 +50,6 @@ aceQTLs, and meQTLs. Store the results in results/multi_qtl.tsv.
 __pair_table.R__: Creates tables/pair_table.md, which gives the number of
 significantly correlated features between each pair of data types.
 
+__qtl_overlap.R__: Creates plots/qtl_overlap.png, plots/*qtl_venn.png, and
+tables/qtl_overlap.md. These all quantify the proportion of overlapping QTLs
+by pi1, that is, by applying the two step multiple testing procedure. 
