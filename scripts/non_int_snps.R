@@ -3,6 +3,9 @@
 library(ggplot2)
 source(file=file.path("utils", "load_data.R"))
 
+data.types <- c("e", "ace", "me")
+qtl.files <- file.path("results", paste0(data.types, "QTL"), "PC10.tsv")
+
 cache.file <- file.path("cache", "non_int_snps.Rdata")
 if (!file.exists(cache.file)) {
     manifest <- setkey(load.manifest(), snp)
@@ -22,11 +25,24 @@ if (!file.exists(cache.file)) {
     load(cache.file)
 }
 
+cis.snps <- lapply(qtl.files, fread, select="snp")
+cis.snps <- lapply(cis.snps, "[", j=unique(snp))
+names(cis.snps) <- data.types
+
+manifest[,snp.type := "all"]
+setkey(manifest, snp)
+
+cis.snps <- lapply(data.types, function (d) {
+    copy(manifest[cis.snps[[d]]])[, snp.type := paste0("cis-", d)]
+})
+manifest <- rbind(manifest, rbindlist(cis.snps))
+
 p <- ggplot(manifest, aes(x=count)) + 
      geom_histogram(binwidth=1) +
      labs(x="samples with non-integer data", y="number of SNPs") +
      theme_bw() +
-     scale_y_log10()
+     scale_y_log10() +
+     facet_wrap(~snp.type)
 
 pdf(file.path("plots", "non_int_snps.pdf"), width=7*1.5, height=7*0.75)
 print(p)

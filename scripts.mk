@@ -38,4 +38,6 @@ scripts/pair_table.R: utils/load_data.R
 
 scripts/missing.R: utils/load_data.R
 
-scripts/non_int_snps.R: utils/load_data.R
+scripts/non_int_snps.R: utils/load_data.R $(QTL_RAW)
+
+scripts/non_int_patients.R: utils/load_data.R
