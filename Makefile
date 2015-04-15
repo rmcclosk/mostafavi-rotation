@@ -1,7 +1,7 @@
 all: results tables plots
 
-include tables.mk
 include plots.mk
+include tables.mk
 include results.mk
 include scripts.mk
 include utils.mk

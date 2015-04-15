@@ -58,7 +58,7 @@ data/module_means_filtered_byphenotype.txt:
 	ln -s /home/unix/mostafav/projects/cogdec_mnet/results/clustering/se_final_clusters/$(notdir $@) $@
 	
 data/ROSMAP_brain_rnaseq_best_eQTL.txt data/sign_modules_celltypes_PC_Rosemary.txt:
-	echo "This file was emailed to me: $@"
+	@echo "This file was emailed to me: $@"
 
 data/phenotype_740qc_finalFromLori.txt:
 	ln -s /broad/dejagerlab/cogdec/datasets/ROSMAP/DNA_Methylation/DNA_Methylation_Brain_DLPFC_450K/frozenDataSet/$(notdir $@) $@

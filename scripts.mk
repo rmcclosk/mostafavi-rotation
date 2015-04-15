@@ -26,11 +26,17 @@ scripts/validate_genes.R: data/ROSMAP_brain_rnaseq_best_eQTL.txt $(foreach BASE,
 
 scripts/validate_snps.R: data/ROSMAP_brain_rnaseq_best_eQTL.txt utils/load_data.R $(QTL_BEST)
 
-scripts/pairs.R: utils/load_data.R utils/QTL-common.R
+scripts/eQTL.R: utils/load_data.R utils/QTL-common.R
+
+scripts/meQTL.R: utils/load_data.R utils/QTL-common.R
+
+scripts/aceQTL.R: utils/load_data.R utils/QTL-common.R
 
 scripts/multi_qtl_data.R: results/multi_qtl.tsv utils/misc.R utils/load_data.R
 	
 scripts/imputation.R: utils/load_data.R
+
+scripts/pairs.R: utils/load_data.R utils/QTL-common.R
 
 scripts/pairs_qvalue.R: $(PAIRS_RAW)
 

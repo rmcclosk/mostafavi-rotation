@@ -3,7 +3,7 @@
 library(ggplot2)
 source(file=file.path("utils", "load_data.R"))
 
-cache.file <- file.path("scratch", "non_int_patients.Rdata")
+cache.file <- file.path("cache", "non_int_patients.Rdata")
 if (!file.exists(cache.file)) {
     manifest <- setkey(load.manifest(), snp)
     patients <- load.patients()

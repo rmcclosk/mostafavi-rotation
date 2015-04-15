@@ -6,7 +6,7 @@ library(data.table)
 library(qvalue)
 
 dir <- commandArgs(trailingOnly=TRUE)[2]
-dir <- gsub("/", "", dir)
+dir <- tail(strsplit(gsub("/", " ", dir), " ")[[1]], 1)
 if (!dir %in% c("eQTL", "meQTL", "aceQTL")) {
     cat("Wrong argument\n", stderr())
     quit()
@@ -14,7 +14,7 @@ if (!dir %in% c("eQTL", "meQTL", "aceQTL")) {
 
 data.types <- c("PC0.nocov", paste0("PC", 0:20))
 
-files <- file.path(dir, paste0(data.types, ".tsv"))
+files <- file.path("results", dir, paste0(data.types, ".tsv"))
 files <- files[file.exists(files)]
 
 # read data

@@ -12,6 +12,13 @@ which SNPs can be found in which files.
 __patients.R__: Creates data/patients.tsv, which is a compiled list of patients
 phenotypes.
 
+__eQTL.R, meQTL.R, aceQTL.R__: Compute all cis-QTL correlations (not just
+significant ones), for various numbers of removed principal components, and
+stores the results in results/*QTL/*.tsv.
+
+__qvalue.R__: Finds the best QTL for each genomic feature, computes q-values,
+and outputs the result to results/*QTL/*best.tsv.
+
 __qtl_table.R__: Creates tables/qtl_table.md, which gives some general
 statistics about the number of tests done and QTLs discovered.
 
