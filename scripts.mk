@@ -47,3 +47,5 @@ scripts/missing.R: utils/load_data.R
 scripts/non_int_snps.R: utils/load_data.R $(QTL_RAW)
 
 scripts/non_int_patients.R: utils/load_data.R
+
+scripts/deal_phenotypes.R: data/patients.tsv utils/deal.R

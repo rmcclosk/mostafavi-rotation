@@ -3,7 +3,7 @@
 # Bayesian network on phenotypes with the deal package.
 
 library(deal)
-source(file="deal.R")
+source(file=file.path("utils", "deal.R"))
 
 set.seed(0)
 
@@ -15,7 +15,7 @@ nice.dim <- function (n) {
 
 cvars <- c("tangles_sqrt", "amyloid_sqrt", "globcog_random_slope")
 dvars <- c("pathoAD", "pmAD")
-data <- read.csv("../../data/pheno_cov_n2963_092014_forPLINK.csv", na.strings=c("-9"))
+data <- read.table(file.path("data", "patients.tsv"), header=TRUE)
 data <- data[,c(cvars, dvars)]
 
 data[which(data[,cvars] == 0, arr.ind=TRUE)] <- NA
@@ -28,7 +28,7 @@ best.nets <- best.nets.exhaustive(data)
 w <- nice.dim(length(best.nets))
 h <- length(best.nets)/w
 
-png("phenotypes.png", width=480*w, height=480*h)
+png(file.path("plots", "deal_phenotypes.png"), width=480*w, height=480*h)
 par(mfrow=c(w, h), mar=c(0, 0, 0, 0))
 sapply(best.nets, plot)
 dev.off()

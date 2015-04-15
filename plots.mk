@@ -6,7 +6,8 @@ plots: densities \
 						  validate_snps.png \
 						  non_int_snps.png \
 						  non_int_patients.png \
-	                      qtl_overlap.png)
+	                      qtl_overlap.png \
+						  deal_phenotypes.png)
 
 densities: $(patsubst %,plots/phenotypes/%.png,amyloid_sqrt globcog_random_slope tangles_sqrt)
 

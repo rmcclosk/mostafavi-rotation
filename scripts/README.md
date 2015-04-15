@@ -67,3 +67,7 @@ distribution of non-integer counts among SNPs on the Affy6 array manifest.
 __non_int_patients.R__: Creates plots/non_int_patients.png, which shows the 
 distribution of non-integer counts by SNP among patients (like above, except
 instead of counts of patients per SNP, it's counts of SNPs per patient).
+
+__deal_phenotypes.R__: Creates a Bayesian network for 5 important phenotypes
+using deal. The networks are visualized in plots/deal_phenotypes.png.
+

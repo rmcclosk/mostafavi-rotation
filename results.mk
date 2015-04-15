@@ -30,6 +30,6 @@ $(foreach BASE,$(QTL_BASE),results/%QTL/$(BASE).best.tsv): scripts/qvalue.R $(fo
 # eQTL/PC1.tsv et al.
 $(foreach BASE,$(QTL_BASE),results/%QTL/$(BASE).tsv): scripts/%QTL.R utils/QTL-common.R
 	$(word 1, $^) --args $(shell echo $$LSB_DJOB_NUMPROC)
-#
-## don't delete any intermediate files
-#.SECONDARY: $(QTL_RAW)
+
+# don't delete any intermediate files
+.SECONDARY: $(QTL_RAW)
