@@ -5,102 +5,75 @@
 library(reshape2)
 library(data.table)
 library(ggplot2)
+source(file=file.path("utils", "load_data.R"))
+source(file=file.path("utils", "misc.R"))
 
-# read patient IDs
-cat("Reading patient IDs\n")
-keep.cols <- c("methylation.id", "genotype.id", "projid", "use.for.qtl")
-id.map <- fread("../data/patients.tsv", select=keep.cols)
-id.map <- id.map[which(use.for.qtl)]
-setkey(id.map, methylation.id)
-
-# read meQTLs
-cat("Reading meQTLs\n")
-meqtl <- fread("../primary/meQTL/best.tsv", 
-               select=c("snp", "feature", "adj.p.value", "q.value"))
-setkey(meqtl, feature, adj.p.value)
-meqtl <- meqtl[,.SD[1], by=feature]
-meqtl <- meqtl[q.value < 0.05,]
-meqtl[,n.cpgs := length(feature), by=snp]
-meqtl <- meqtl[n.cpgs > 1,]
-setkey(meqtl, feature, snp)
-
-# get columns of methylation data to read
-cat("Preselecting columns for methylation data\n")
-mfile <- "../data/ill450kMeth_all_740_imputed.txt"
-mpatients <- tail(strsplit(readLines(mfile, n=1), "\t")[[1]], -1)
-keep.cols <- na.omit(id.map[,match(methylation.id, mpatients)])
-mprojid <- id.map[mpatients[keep.cols],projid]
-
-# get rows of methylation data to read
-cat("Preselecting rows for methylation data\n")
-mfeatures <- fread(mfile, skip=1, select=1)[,V1]
-keep.rows <- sort(match(meqtl[,feature], mfeatures))
-
-# read methylation data
-cat("Reading methylation data\n")
-mdata <- fread(mfile, select=c(1, keep.cols+1))
-setnames(mdata, "TargetID", "feature")
-mdata <- mdata[keep.rows,]
-setkey(mdata, feature)
-setnames(mdata, mpatients[keep.cols], as.character(mprojid))
-stopifnot(mdata[,feature] == unique(meqtl[,feature]))
-
-# transpose methylation data
-cat("Transposing methylation data\n")
-mdata <- melt(mdata, id.vars=c("feature"), variable.name="projid")
-mdata <- dcast.data.table(mdata, projid~feature)
-setkey(mdata, projid)
-
-# get genotype data
-cat("Reading genotype manifest\n")
-manifest <- fread("../data/genotype_manifest.tsv")
-manifest <- manifest[match(meqtl[,snp], snp)]
-setkey(manifest, snp)
-manifest <- unique(manifest)
-manifest[,file := paste0("../data/", file)]
-
-cat("Preselecting rows for genotype data\n")
-setkey(id.map, genotype.id)
-gfile <- "../data/transposed_1kG/chr1/chr1.560001.560059.snplist.test.snps.dosage.1kg.trans.txt"
-gpatients <- fread(gfile, select=1, skip=1)[,V1]
-keep.rows <- sort(match(id.map[,genotype.id], gpatients))
-gprojid <- id.map[gpatients[keep.rows], projid]
-sed.cmd <- paste0("sed '", paste0(c(1, 1+keep.rows), collapse="p;"), "q;d'")
-
-cat("Reading genotype data\n")
-pb <- txtProgressBar(0, manifest[,length(unique(file))], style=3)
-gdata <- by(manifest, manifest[,file], function (x) {
-    d <- fread(paste(sed.cmd, x[1,file]), select=c(1, 1+x[,column]), skip=1)
-    setnames(d, colnames(d), c("projid", x[,snp]))
-    stopifnot(d[,projid] == gpatients[keep.rows])
-    d[,projid := gprojid]
-    setTxtProgressBar(pb, getTxtProgressBar(pb)+1)
-    setkey(d, projid)
-})
-close(pb)
-gdata <- Reduce(merge, gdata)
-setkey(gdata, projid)
+pc.use <- 10
 
 cor.spearman <- function (x, y)
     cor.test(x, y, method="spearman")$p.value
 
 cor.pca <- function (geno, methyl) 
-    log10(cor.spearman(geno, prcomp(methyl)$x[,1]))
+    -log10(cor.spearman(geno, prcomp(methyl)$x[,1]))
 
-mean.cor <- function (geno, methyl)
-    mean(sapply(methyl, function (m) log10(cor.spearman(geno, m))))
+cache.file <- file.path("cache", "meqtl_pca.Rdata")
+if (!file.exists(cache.file)) {
+    # read patient IDs
+    patients <- load.patients()
+    
+    # read meQTLs
+    meqtl.file <- file.path("results", "meQTL", paste0("PC", pc.use, ".best.tsv"))
+    meqtl <- fread(meqtl.file)[q.value < 0.05,]
+    meqtl[,n.cpgs := length(feature), by=snp]
+    meqtl <- meqtl[n.cpgs > 1,]
+    setkey(meqtl, feature, snp)
 
-meqtl[,cor.pca := cor.pca(gdata[[as.character(snp)]], mdata[,feature,with=FALSE]), snp]
-meqtl[,mean.log.p := mean.cor(gdata[[as.character(snp)]], mdata[,feature,with=FALSE]), snp]
+    # get genotype data
+    manifest <- setkey(load.manifest(), snp)
+    manifest <- merge(manifest, meqtl[,"snp", with=FALSE])
+    manifest <- unique(setkey(manifest, snp))
+    setkey(manifest, file, column)
+    gdata <- load.gdata(manifest, patients)
+    
+    # read methylation data
+    mdata <- rm.pcs(load.mdata(patients), pc.use)
+    
+    # keep just the CpGs with a QTL
+    mdata <- mdata[,colnames(mdata) %in% meqtl[,feature]]
 
-meqtl[,n.cpgs := cut(n.cpgs, breaks=5)]
-png("meqtl_pca.png")
-ggplot(meqtl, aes(x=-mean.log.p, y=-cor.pca, col=n.cpgs, shape=n.cpgs)) +
-    geom_point(size=3) +
-    stat_function(fun=identity, col="black", linetype="dashed") +
-    scale_y_log10() +
-    scale_x_log10() +
-    xlab("mean -log P-value of meQTL correlations") +
-    ylab("-log P-value of correlation with PC1") +
-    theme_bw()
+    stopifnot(rownames(mdata) == rownames(gdata))
+
+    meqtl[,PC1 := cor.pca(gdata[,as.character(snp)], mdata[,feature]), snp]
+    stats <- meqtl[,as.list(summary(-log10(adj.p.value))), snp]
+
+    setkey(meqtl, snp)
+    setkey(stats, snp)
+    stats <- merge(unique(meqtl), unique(stats))
+
+    stats[,c("feature", "rho", "t.stat", "p.value", "adj.p.value", "n.cpgs", "q.value") := NULL]
+    save(stats, file=cache.file)
+
+} else {
+    load(cache.file)
+}
+
+#stats <- melt(stats, id.vars="snp", variable.name="statistic", value.name="value")
+#levels(stats$statistic) <- c("PC1", "Min.", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max.")
+
+stats <- melt(stats, id.vars=c("snp", "PC1"), variable.name="statistic", value.name="value")
+stats[PC1 == Inf, PC1 := 200] # TODO: better value
+
+p <- ggplot(stats, aes(x=value, y=PC1)) +
+    stat_binhex() +
+    labs(x="-log10 P-value of correlation with CpG", y="-log10 P-value of correlation with PC1")  +
+    facet_wrap(~statistic) +
+    theme_bw() +
+    geom_abline(intercept=0, slope=1, color="red")
+
+png(file.path("plots", "meqtl_pca.png"))
+print(p)
+dev.off()
+
+pdf(file.path("plots", "meqtl_pca.pdf"))
+print(p)
 dev.off()
