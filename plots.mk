@@ -7,7 +7,8 @@ plots: densities \
 						  non_int_snps.png \
 						  non_int_patients.png \
 	                      qtl_overlap.png \
-						  deal_phenotypes.png)
+						  deal_phenotypes.png \
+						  deal_modules.png)
 
 densities: $(patsubst %,plots/phenotypes/%.png,amyloid_sqrt globcog_random_slope tangles_sqrt)
 
@@ -17,6 +18,9 @@ plots/%.png plots/%/%.png: scripts/%.R
 plots/%.png: scripts/%.R
 	$^
 
-# hack
+# ugly hacks for scripts which produce more than one output
 plots/qtl_overla%.png tables/qtl_overla%.md: scripts/qtl_overla%.R
+	$^
+
+plots/deal%.png results/deal%.net: scripts/deal%.R
 	$^

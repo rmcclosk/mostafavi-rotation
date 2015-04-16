@@ -9,7 +9,7 @@ QTL_BEST = $(foreach DIR,$(QTL_FOLDERS),$(foreach BASE,$(QTL_BASE),$(DIR)/$(BASE
 
 PAIRS_BEST = $(addsuffix .tsv, $(addprefix results/pairs/, ace_e ace_me e_ace e_me me_ace me_e))
 
-results: $(addprefix results/,multi_qtl_data.tsv) $(PAIRS_BEST)
+results: $(addprefix results/,multi_qtl_data.tsv) $(PAIRS_BEST) results/deal_modules.gv
 
 results/pairs/%.tsv: scripts/pairs_qvalue.R 
 	$^ --args $(wordlist 1, 2, $(subst _, , $(patsubst %.tsv, %, $(notdir $@))))
@@ -31,5 +31,8 @@ $(foreach BASE,$(QTL_BASE),results/%QTL/$(BASE).best.tsv): scripts/qvalue.R $(fo
 $(foreach BASE,$(QTL_BASE),results/%QTL/$(BASE).tsv): scripts/%QTL.R utils/QTL-common.R
 	$(word 1, $^) --args $(shell echo $$LSB_DJOB_NUMPROC)
 
-# don't delete any intermediate files
+results/%.gv: utils/net2gv.py results/%.net
+	$(word 1,$^) < $(word 2,$^) > $@
+
+# don't delete intermediate files
 .SECONDARY: $(QTL_RAW)

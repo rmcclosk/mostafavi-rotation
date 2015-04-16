@@ -49,3 +49,5 @@ scripts/non_int_snps.R: utils/load_data.R $(QTL_RAW)
 scripts/non_int_patients.R: utils/load_data.R
 
 scripts/deal_phenotypes.R: data/patients.tsv utils/deal.R
+
+scripts/deal_modules.R: data/patients.tsv utils/deal.R data/module_means_filtered_byphenotype.txt
