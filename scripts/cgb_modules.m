@@ -1,5 +1,6 @@
 % run CGBayesNets on gene mdata plus phenotypes
 
+path('utils', path);
 SetUpCGBayesNets;
 
 % common parameter values:
@@ -16,7 +17,7 @@ searchParameter.backtracking = true;
 searchParameter.nophenotype = true;
 
 % read module means
-fid = fopen('../../data/module_means_filtered_byphenotype.txt');
+fid = fopen(fullfile('data', 'module_means_filtered_byphenotype.txt'));
 header = strsplit(fgetl(fid), '\t');
 mcols = header(2:end);
 
@@ -28,8 +29,8 @@ mpatients = regexprep(mpatients, ':.*', '');
 mdata = cell2mat(mdata(:,2:end));
 
 % read phenotypes 
-fid = fopen('../../data/pheno_cov_n2963_092014_forPLINK.csv');
-header = strsplit(fgetl(fid), ',');
+fid = fopen(fullfile('data', 'patients.tsv'));
+header = strsplit(fgetl(fid), '\t');
 fmt = ['%s' '%s' '%s' repmat('%f', 1, length(header)-3)];
 
 pcols = {'tangles_sqrt', 'amyloid_sqrt', 'globcog_random_slope', 'pathoAD', 'pmAD'};
@@ -43,7 +44,6 @@ fclose(fid);
 
 ppatients = pdata{:,3};
 pdata = cell2mat(pdata(:,col_idx));
-pdata(pdata == -9) = NaN;
 
 % match patients from two datasets
 patients = intersect(mpatients, ppatients);
@@ -63,4 +63,4 @@ disc = IsDiscrete(data);
 
 % build the network
 FullBNet = FullBNLearn(data, cols, 'pmad', 0, 'pmad', priorPrecision, disc, false, searchParameter);
-GVOutputBayesNet(FullBNet, 'modules.gv');
+GVOutputBayesNet(FullBNet, fullfile('results', 'cgb_modules.gv'));

@@ -51,3 +51,7 @@ scripts/non_int_patients.R: utils/load_data.R
 scripts/deal_phenotypes.R: data/patients.tsv utils/deal.R
 
 scripts/deal_modules.R: data/patients.tsv utils/deal.R data/module_means_filtered_byphenotype.txt
+
+scripts/deal_qtl.R: utils/deal.R results/multi_qtl_data.tsv
+
+scripts/cgb_phenotypes.m: utils/GVOutputBayesNet.m utils/RCSVLoad.m utils/SetUpCGBayesNets.m data/patients.tsv

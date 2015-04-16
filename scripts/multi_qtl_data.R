@@ -54,6 +54,8 @@ setDT(gdata)
 setnames(gdata, c("Var1", "Var2"), c("projid", "snp"))
 setkey(gdata, projid, snp)
 data <- merge(data, gdata)
+
+# TAKE THE MOST LIKELY SNP
 data$g <- round(data$g)
 
 # finally, write everything to a file

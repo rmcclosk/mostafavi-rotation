@@ -1,3 +1,4 @@
+path('utils', path);
 SetUpCGBayesNets;
 
 % common parameter values:
@@ -13,41 +14,44 @@ priorPrecision.maxParents = 3;
 searchParameter.backtracking = true;
 searchParameter.nophenotype = true;
 
-% load the data
-[data, cols, ~, keep_cols] = RCSVLoad('../../primary/multi_qtl_data.tsv', ...
-                                      true, ...
-                                      '\t', ...
-                                      false, ...
-                                      ['feature.me' 'feature.ace' 'feature.e']);
-cols = cols(keep_cols);
+% read the data
+fid = fopen(fullfile('results', 'multi_qtl_data.tsv'));
+header = strsplit(fgetl(fid), '\t');
+fmt = [repmat('%s', 1, 5), repmat('%f', 1, 4)];
+data = textscan(fid, fmt, 'Delimiter', '\t', 'TreatAsEmpty', {'NA'});
+fclose(fid);
+
+% find the numeric columns
+g_idx = find(ismember(header, 'g'));
+e_idx = find(ismember(header, 'e'));
+a_idx = find(ismember(header, 'ace'));
+m_idx = find(ismember(header, 'me'));
+cols = [g_idx e_idx a_idx m_idx];
 
 % order by SNP
-snp_idx = find(ismember(cols, 'snp'));
-[~, order] = sort(data(:, snp_idx));
-data = data(order,:);
+snp_idx = find(ismember(header, 'snp'));
+[~, order] = sort(data{snp_idx});
+numdata = cell2mat(data(cols));
+numdata = numdata(order,:);
 
 % find the boundaries of data for each snp
-[~,starts,~] = unique(data(:, snp_idx));
+snps = data{snp_idx};
+snps = snps(order);
+[~,starts,~] = unique(snps);
 [nqtl,~] = size(starts);
 
-g_idx = find(ismember(cols, 'g'));
-e_idx = find(ismember(cols, 'e'));
-a_idx = find(ismember(cols, 'ace'));
-m_idx = find(ismember(cols, 'me'));
-
-cols = cols([g_idx e_idx a_idx m_idx]);
-data = data(:,[g_idx e_idx a_idx m_idx]);
-disc = IsDiscrete(data);
+disc = IsDiscrete(numdata);
 
 % get the model string for each network
 % as far as I can tell CGBayesNets has no blacklist capabilities
+cols = header(cols); % use column names instead of numbers
 topos = [];
-[nrow,~] = size(data);
+[nrow,~] = size(numdata);
 for i = 1:nqtl
     if (i < nqtl)
-        bnData = data(starts(i):(starts(i+1)-1),:);
+        bnData = numdata(starts(i):(starts(i+1)-1),:);
     else
-        bnData = data(starts(i):nrow,:);
+        bnData = numdata(starts(i):nrow,:);
     end
     net = FullBNLearn(bnData, cols, 'foo', 0, 'foo', priorPrecision, disc, false, searchParameter);
     str = '';
@@ -74,7 +78,12 @@ topos = sort(topos);
 [topos, idx] = unique(topos);
 counts = diff([idx; ntopos+1]);
 [counts, order] = sort(counts);
+
+topos = topos(fliplr(order));
+counts = counts(fliplr(order));
+
 topos = topos(order);
+counts = counts(order);
 
 [ntopos,~] = size(topos);
 
@@ -87,5 +96,5 @@ figure
 barh(counts);
 ylim([0 ntopos+1]);
 set(gca, 'YTickMode', 'manual', 'YTick', 1:ntopos, 'YTickLabel', topos);
-print('qtl', '-dpng', '-r300');
-print('qtl', '-dpdf');
+print(fullfile('plots', 'cgb_qtl'), '-dpng', '-r300');
+print(fullfile('plots', 'cgb_qtl'), '-dpdf');

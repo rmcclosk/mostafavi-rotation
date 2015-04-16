@@ -4,6 +4,21 @@ Rotation with the Mostafavi lab
 This is the repository for Rosemary McCloskey's Spring 2015 rotation project
 with Sara Mostafavi.
 
+Set up
+------
+
+If you are on the Broad server, you will need to type these commands into the
+shell.
+
+    use R-3.1
+    use Python-3.4
+    use Matlab
+    use Tex-Latex
+    use Graphviz
+
+Running everything
+------------------
+
 The entire project is run using a Makefile. It's called GNUmakefile because I
 make heavy use of pattern rules, which are a GNU make extension. The main
 GNUmakefile sources several other makefiles, each with the suffix `.mk`, in the
@@ -16,7 +31,17 @@ work if you try to run them again, because the symlink is already there. Also,
 a couple of the data files were sent to me in an email, so these cannot be
 remade.
 
-This repository is organized into a series of folders.
+All the code expects to be run or sourced from the project's root directory
+(where this README is). Most of the scripts won't work if you try to run them
+from the scripts directory or anywhere else. 
+
+In any case, the code should generally not be run directly; instead you should
+use `make somedir/somefile`, where `somedir/somefile` is the file you want to
+produce (probably something in results, plots, or tables). You can use `make
+-B` to force the file to be remade, even if make thinks it's up to date.
+
+Folder structure
+----------------
 
 __data__ contains all the raw data.
 

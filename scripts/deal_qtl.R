@@ -3,12 +3,12 @@
 library(data.table)
 library(ggplot2)
 
-source(file="deal.R")
+source(file=file.path("utils", "deal.R"))
 
 banlist <- matrix(c(2,3,4,1,1,1), ncol=2)
 
 classes <- list(factor=c("g"))
-data <- fread("../../primary/multi_qtl_data.tsv", colClasses=classes)
+data <- fread(file.path("results", "multi_qtl_data.tsv"), colClasses=classes)
 
 setkey(data, snp, projid)
 tops <- by(data, data[,snp], function (x) {
@@ -28,10 +28,10 @@ p <- ggplot(d, aes(x=topology)) +
     theme_bw() +
     coord_flip()
 
-png("qtl.png", height=480*1.5)
+png(file.path("plots", "deal_qtl.png"), height=480*1.5)
 print(p)
 dev.off()
 
-pdf("qtl.pdf", height=10)
+pdf(file.path("plots", "deal_qtl.pdf"), height=10)
 print(p)
 dev.off()

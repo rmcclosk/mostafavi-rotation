@@ -5,4 +5,5 @@ function SetUpCGBayesNets( )
     bnpathscript;
     tic;
     cd(curdir);
+    path('utils', path);
 end
