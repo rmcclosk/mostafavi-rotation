@@ -1,4 +1,4 @@
-Read 0.0% of 19064156 rowsRead 10.0% of 19064156 rowsRead 20.4% of 19064156 rowsRead 29.6% of 19064156 rowsRead 40.9% of 19064156 rowsRead 46.8% of 19064156 rowsRead 57.8% of 19064156 rowsRead 61.2% of 19064156 rowsRead 72.1% of 19064156 rowsRead 76.8% of 19064156 rowsRead 86.7% of 19064156 rowsRead 94.6% of 19064156 rowsRead 19064156 rows and 2 (of 5) columns from 1.364 GB file in 00:00:27
+Read 0.0% of 19064156 rowsRead 9.6% of 19064156 rowsRead 20.3% of 19064156 rowsRead 29.6% of 19064156 rowsRead 40.3% of 19064156 rowsRead 46.8% of 19064156 rowsRead 57.3% of 19064156 rowsRead 61.2% of 19064156 rowsRead 71.4% of 19064156 rowsRead 76.8% of 19064156 rowsRead 86.7% of 19064156 rowsRead 94.6% of 19064156 rowsRead 19064156 rows and 2 (of 5) columns from 1.364 GB file in 00:00:28
 
 
 |                               |eQTL              |aceQTL            |meQTL              |

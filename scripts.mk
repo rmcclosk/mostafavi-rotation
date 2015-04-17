@@ -1,59 +1,28 @@
 # This Makefile shows all the dependencies of scripts upon data files, utility
 # functions, and other scripts.
 
-# QTL results
-QTL_FOLDERS = $(patsubst %,results/%QTL,e ace me)
-QTL_BASE = $(patsubst %,PC%,0.nocov 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)
-QTL_RAW = $(foreach DIR,$(QTL_FOLDERS),$(foreach BASE,$(QTL_BASE),$(DIR)/$(BASE).tsv))
-QTL_BEST = $(foreach DIR,$(QTL_FOLDERS),$(foreach BASE,$(QTL_BASE),$(DIR)/$(BASE).best.tsv))
-
-# results for other pairwise correlations
-PAIRS_RAW = $(addprefix results/,ace_e_pairs.tsv ace_me_pairs.tsv e_me_pairs.tsv)
-
 scripts/genotype_manifest.R: data/transposed_1kG
 
-scripts/patients.R: data/pheno_cov_n2963_092014_forPLINK.csv data/phenotype_740qc_finalFromLori.txt data/techvars_plus_phenotypes26SEP2014.txt data/chipSeqResiduals.csv data/residual_gene_expression_expressed_genes_2FPKM100ind.txt data/ill450kMeth_all_740_imputed.txt data/transposed_1kG
+scripts/patients.R: data/pheno_cov_n2963_092014_forPLINK.csv \
+					data/phenotype_740qc_finalFromLori.txt \
+					data/techvars_plus_phenotypes26SEP2014.txt \
+					data/chipSeqResiduals.csv \
+					data/residual_gene_expression_expressed_genes_2FPKM100ind.txt \
+					data/ill450kMeth_all_740_imputed.txt data/transposed_1kG
 
-scripts/phenotypes.R: data/pheno_cov_n2963_092014_forPLINK.csv
+scripts/qtl_table.R: utils/misc.R
 
-scripts/qtl_pca.R: $(QTL_RAW) $(QTL_BEST)
+scripts/eQTL.R scripts/meQTL.R scripts/aceQTL.R: utils/load_data.R utils/QTL-common.R
 
-scripts/qtl_table.R: utils/misc.R $(foreach FILE,PC0.tsv PC0.best.tsv PC0.nocov.best.tsv,$(QTL_FOLDERS)/$(FILE))
-
-scripts/pca_overlap.R: $(QTL_BEST)
-
-scripts/validate_genes.R: data/ROSMAP_brain_rnaseq_best_eQTL.txt $(foreach BASE, $(QTL_BASE),results/eQTL/$(BASE).best.tsv)
-
-scripts/validate_snps.R: data/ROSMAP_brain_rnaseq_best_eQTL.txt utils/load_data.R $(QTL_BEST)
-
-scripts/eQTL.R: utils/load_data.R utils/QTL-common.R
-
-scripts/meQTL.R: utils/load_data.R utils/QTL-common.R
-
-scripts/aceQTL.R: utils/load_data.R utils/QTL-common.R
-
-scripts/multi_qtl_data.R: results/multi_qtl.tsv utils/misc.R utils/load_data.R
+scripts/multi_qtl_data.R: utils/misc.R utils/load_data.R
 	
-scripts/imputation.R: utils/load_data.R
-
 scripts/pairs.R: utils/load_data.R utils/QTL-common.R
 
-scripts/pairs_qvalue.R: $(PAIRS_RAW)
+scripts/deal%.R: utils/deal.R
 
-scripts/pair_table.R: utils/load_data.R
+scripts/mediation_qtl.R: utils/causal.R
 
-scripts/missing.R: utils/load_data.R
+scripts/cgb%.m: $(CGB_UTILS)
 
-scripts/non_int_snps.R: utils/load_data.R $(QTL_RAW)
-
-scripts/non_int_patients.R: utils/load_data.R
-
-scripts/deal_phenotypes.R: data/patients.tsv utils/deal.R
-
-scripts/deal_modules.R: data/patients.tsv utils/deal.R data/module_means_filtered_byphenotype.txt
-
-scripts/deal_qtl.R: utils/deal.R results/multi_qtl_data.tsv
-
-scripts/cgb_phenotypes.m: utils/GVOutputBayesNet.m utils/RCSVLoad.m utils/SetUpCGBayesNets.m data/patients.tsv
-
-scripts/cgb_qtl.m: utils/GVOutputBayesNet.m utils/RCSVLoad.m utils/SetUpCGBayesNets.m results/multi_qtl_data.tsv
+# unless otherwise specified, everything depends on load_data.R
+scripts/%.R: utils/load_data.R

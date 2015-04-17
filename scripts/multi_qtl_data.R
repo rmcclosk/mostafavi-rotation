@@ -24,7 +24,7 @@ patients <- load.patients()
 data <- list(load.edata(patients), load.adata(patients), load.mdata(patients))
 
 # remove PCs
-data <- mapply(rm.pcs, data, pc.rm, SIMPLIFY=FALSE)
+data <- c(data, mapply(rm.pcs, data, pc.rm, SIMPLIFY=FALSE))
 
 # keep only features associated with multi-QTLs
 feature.vars <- paste0("feature.", qtl.types)
@@ -33,9 +33,10 @@ data <- mapply(subset, data, select=keep.cols, SIMPLIFY=FALSE)
 
 # melt the data
 varnames <- mapply(c, "projid", feature.vars, SIMPLIFY=FALSE)
-data <- mapply(melt, data, varnames=varnames, value.name=qtl.types, SIMPLIFY=FALSE)
+value.names <- c(paste0(qtl.types, ".orig"), qtl.types)
+data <- mapply(melt, data, varnames=varnames, value.name=value.names, SIMPLIFY=FALSE)
 
-# combine all 3 data types
+# combine all data types
 data <- lapply(data, setDT)
 data <- mapply(setkeyv, data, varnames, SIMPLIFY=FALSE)
 setkey(multi.qtls, snp, feature.e, feature.ace, feature.me)
