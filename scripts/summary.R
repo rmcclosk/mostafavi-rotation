@@ -5,7 +5,7 @@
 library(ggplot2)
 library(reshape2)
 
-source(file="../utils/load_data.R")
+source(file=file.path("utils", "load_data.R"))
 
 patients <- load.patients()
 data <- list(load.edata(patients), load.adata(patients), load.mdata(patients))
@@ -28,10 +28,10 @@ p <- ggplot(data, aes(x=patient, y=value, color=statistic, group=statistic)) +
           panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank())
 
-pdf("summary.pdf")
+pdf(file.path("plots", "summary.pdf"))
 print(p)
 dev.off()
 
-png("summary.png")
+png(file.path("plots", "summary.png"))
 print(p)
 dev.off()

@@ -10,7 +10,7 @@ library(tikzDevice)
 
 sol <- solarized.Colours(variant = "srgb")
 
-data <- fread("../data/patients.tsv")
+data <- fread(file.path("data", "patients.tsv"))
 
 epatients <- data[!is.na(expression.id), projid]
 mpatients <- data[!is.na(methylation.id), projid]
@@ -37,15 +37,15 @@ venn.args[["label.col"]] = sol$base00
 venn.args[["fontfamily"]] = "Helvetica"
 venn.args[["cat.fontfamily"]] = "Helvetica"
 
-png("datatypes_venn.png", bg="transparent")
+png(file.path("plots", "datatypes_venn.png"), bg="transparent")
 grid.draw(do.call(draw.quad.venn, venn.args))
 dev.off()
 
-pdf("datatypes_venn.pdf", bg="transparent")
+pdf(file.path("plots", "datatypes_venn.pdf"), bg="transparent")
 grid.draw(do.call(draw.quad.venn, venn.args))
 dev.off()
 
-tikz("datatypes_venn.tex", width=3.2, height=3, bg=sol$base3, fg=sol$base00)
+tikz(file.path("plots", "datatypes_venn.tex"), width=3.2, height=3, bg=sol$base3, fg=sol$base00)
 venn.args[["cex"]] = 1
 venn.args[["cat.cex"]] = 1
 grid.draw(do.call(draw.quad.venn, venn.args))

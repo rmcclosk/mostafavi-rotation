@@ -10,12 +10,11 @@ library(tikzDevice)
 sol <- solarized.Colours(variant = "srgb")
 
 qtl.types <- c("e", "me", "ace")
+pc.use <- c(e=10, ace=10, me=10)
 
 best <- lapply(qtl.types, function (x) {
-    fn <- paste0("../primary/", x, "QTL/best.tsv")
-    res <- fread(fn, select=c("adj.p.value.PC10", "q.value.PC10", "feature", "snp"))[q.value.PC10 < 0.05,]
-    setkey(res, feature, adj.p.value.PC10)
-    res <- res[,.SD[1], feature]
+    fn <- file.path("results", paste0(x, "QTL"), paste0("PC", pc.use[[x]], ".best.tsv"))
+    res <- fread(fn, select=c("adj.p.value", "q.value", "feature", "snp"))[q.value < 0.05,]
     setkey(res, snp)
 })
 names(best) <- qtl.types
@@ -36,17 +35,17 @@ venn.args <- list(
         alpha=rep(0.2, 3),
         margin=0.05)
 
-pdf("qtl_venn.pdf", height=7/2, width=7/2)
+pdf(file.path("plots", "qtl_venn.pdf"), height=7/2, width=7/2)
 grid.draw(do.call(draw.triple.venn, venn.args))
 dev.off()
 
-png("qtl_venn.png", width=480, height=480)
+png(file.path("plots", "qtl_venn.png"), width=480, height=480)
 venn.args[["cex"]] <- 2
 venn.args[["cat.cex"]] <- 2
 grid.draw(do.call(draw.triple.venn, venn.args))
 dev.off()
 
-tikz("qtl_venn.tex", width=2, height=2, bg=sol$base3, fg=sol$base00)
+tikz(file.path("plots", "qtl_venn.tex"), width=2, height=2, bg=sol$base3, fg=sol$base00)
 venn.args[["cex"]] <- 1
 venn.args[["cat.cex"]] <- 1
 venn.args[["cat.col"]] <- sol$base00
