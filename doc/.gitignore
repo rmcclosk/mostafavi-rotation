@@ -2,3 +2,4 @@ presentation-figures
 *.aux
 *.log
 *.pdf
+*.sty

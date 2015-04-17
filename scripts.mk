@@ -55,3 +55,5 @@ scripts/deal_modules.R: data/patients.tsv utils/deal.R data/module_means_filtere
 scripts/deal_qtl.R: utils/deal.R results/multi_qtl_data.tsv
 
 scripts/cgb_phenotypes.m: utils/GVOutputBayesNet.m utils/RCSVLoad.m utils/SetUpCGBayesNets.m data/patients.tsv
+
+scripts/cgb_qtl.m: utils/GVOutputBayesNet.m utils/RCSVLoad.m utils/SetUpCGBayesNets.m results/multi_qtl_data.tsv

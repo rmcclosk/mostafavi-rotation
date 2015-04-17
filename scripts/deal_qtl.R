@@ -9,11 +9,11 @@ banlist <- matrix(c(2,3,4,1,1,1), ncol=2)
 
 classes <- list(factor=c("g"))
 data <- fread(file.path("results", "multi_qtl_data.tsv"), colClasses=classes)
+data[,g := as.factor(g)]
 
 setkey(data, snp, projid)
 tops <- by(data, data[,snp], function (x) {
     net.data <- x[,c("g", "e", "ace", "me"), with=FALSE]
-    net.data[,g := as.factor(g)]
     modelstring(best.nets.exhaustive(net.data, banlist=banlist)[[1]])
 })
 d <- data.frame(topology=c(tops))

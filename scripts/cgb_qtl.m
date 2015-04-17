@@ -6,12 +6,12 @@ SetUpCGBayesNets;
 %       priorPrecision.sigma2; % prior variance estimate
 %       priorPrecision.alpha; % prior sample size for discrete nodes
 %       priorPrecision.maxParents; % hard-limit on the number of parents
-priorPrecision.nu = 1;
+priorPrecision.nu = 2;
 priorPrecision.sigma2 = 1;
-priorPrecision.alpha = 10; 
+priorPrecision.alpha = 2; 
 priorPrecision.maxParents = 3;
 
-searchParameter.backtracking = true;
+searchParameter.annealing = true;
 searchParameter.nophenotype = true;
 
 % read the data
@@ -30,16 +30,17 @@ cols = [g_idx e_idx a_idx m_idx];
 
 % order by SNP
 snp_idx = find(ismember(header, 'snp'));
-[~, order] = sort(data{snp_idx});
+snps = data{snp_idx};
+
+[snps, order] = sort(snps);
 numdata = cell2mat(data(cols));
 numdata = numdata(order,:);
 
 % find the boundaries of data for each snp
-snps = data{snp_idx};
-snps = snps(order);
 [~,starts,~] = unique(snps);
 [nqtl,~] = size(starts);
 
+starts = sort(starts);
 disc = IsDiscrete(numdata);
 
 % get the model string for each network
@@ -53,7 +54,7 @@ for i = 1:nqtl
     else
         bnData = numdata(starts(i):nrow,:);
     end
-    net = FullBNLearn(bnData, cols, 'foo', 0, 'foo', priorPrecision, disc, false, searchParameter);
+    net = FullBNLearn(bnData, cols, 'g', 0, 'g', priorPrecision, disc, false, searchParameter);
     str = '';
     for i = 1:4
         str = strcat(str, '[', cols(i));
@@ -77,13 +78,10 @@ topos = sort(topos);
 [ntopos,~] = size(topos);
 [topos, idx] = unique(topos);
 counts = diff([idx; ntopos+1]);
-[counts, order] = sort(counts);
+[~, order] = sort(counts);
 
 topos = topos(fliplr(order));
 counts = counts(fliplr(order));
-
-topos = topos(order);
-counts = counts(order);
 
 [ntopos,~] = size(topos);
 

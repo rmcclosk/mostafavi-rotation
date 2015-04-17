@@ -7,7 +7,7 @@ library(data.table)
 # this may need to be changed in future depending on how many PCs we want to
 # remove
 qtl.types <- c("e", "ace", "me")
-data.use <- c("PC10", "PC10", "PC4")
+data.use <- c("PC10", "PC10", "PC10")
 
 files <- file.path("results", paste0(qtl.types, "QTL"), paste0(data.use, ".best.tsv"))
 data <- lapply(files, fread)
