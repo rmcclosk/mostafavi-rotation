@@ -16,7 +16,11 @@ plots: $(addprefix plots/,qtl_pca.png \
 						  cgb_modules.png \
 						  cgb_qtl.png \
 						  mediation_qtl.png \
-						  compare_modules.png)
+						  compare_modules.png \
+						  datatypes_venn.png \
+						  summary.png \
+						  qtl_venn.png \
+						  qtl_example.png)
 
 plots/compare_modules.png: results/compare_modules.gv
 	dot -Tpng $^ > $@
@@ -46,6 +50,16 @@ plots/deal_phenotypes.png: scripts/deal_phenotypes.R data/patients.tsv
 	$(word 1, $^)
 
 plots/mediation_qtl.png: scripts/mediation_qtl.R results/multi_qtl_data.tsv
+	$(word 1, $^)
+
+plots/datatypes_venn.png: scripts/datatypes_venn.R data/patients.tsv
+	$(word 1, $^)
+
+plots/qtl_venn.png: scripts/qtl_venn.R $(QTL_BEST_PATHS)
+	$(word 1, $^)
+
+plots/qtl_example.png: scripts/qtl_example.R results/multi_qtl_data.tsv
+	$(word 1, $^)
 
 # deal_modules.png and results/deal_modules.net
 plots/deal%.png results/deal%.net: scripts/deal%.R data/module_means_filtered_byphenotype.txt

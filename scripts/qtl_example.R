@@ -11,7 +11,7 @@ library(ggthemes)
 
 sol <- solarized.Colours(variant = "srgb")
 
-data <- fread("../primary/multi_qtl_data.tsv", drop="projid")
+data <- fread(file.path("results", "multi_qtl_data.tsv"), drop="projid")
 data <- data[which(snp == sample(snp, 1))]
 
 xlab <- "genotype"
@@ -33,14 +33,14 @@ p <- ggplot(data, aes(x=g, y=value, col=data.type, group=data.type)) +
     theme(legend.position = "none") +
     labs(x=xlab, y=NULL)
 
-pdf("qtl_example.pdf")
+pdf(file.path("plots", "qtl_example.pdf"))
 print(p + theme_bw() + theme(legend.position = "none"))
 dev.off()
 
-png("qtl_example.png")
+png(file.path("plots", "qtl_example.png"))
 print(p + theme_bw() + theme(legend.position = "none"))
 dev.off()
 
-tikz("qtl_example.tex", width=3, height=3, bg=sol$base3, fg=sol$base00)
+tikz(file.path("plots", "qtl_example.tex"), width=3, height=3, bg=sol$base3, fg=sol$base00)
 print(p)
 dev.off()
