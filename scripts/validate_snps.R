@@ -60,8 +60,7 @@ qtl.data[,cor.p := get.cor.p(snp.ours, snp.theirs), feature]
 p <- ggplot(qtl.data, aes(x=cor.p)) + 
     geom_density() + 
     theme_bw() + 
-    labs(x="P-value of correlation") +
-    scale_x_log10()
+    labs(x="P-value of correlation")
 
 pdf(file.path("plots", "validate_snps.pdf"))
 print(p)
