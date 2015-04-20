@@ -1,7 +1,10 @@
 # This is the Makefile for everything in the results directory, which contains
 # 'raw' results (ie. tsv files).
 
-results: results/triples.tsv
+results: results/triples_data.tsv
+
+results/triples_data.tsv: scripts/triples_data.R results/triples.tsv
+	$(word 1, $^)
 
 results/triples.tsv: scripts/triples.R $(PAIR_BEST_PATHS)
 	$(word 1, $^)

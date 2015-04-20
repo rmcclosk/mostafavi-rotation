@@ -6,7 +6,7 @@ library(ggplot2)
 
 source(file=file.path("utils", "deal.R"))
 
-cache.file <- file.path("cache", "deal_qtl.R")
+cache.file <- file.path("cache", "deal_qtl.Rdata")
 banlist <- matrix(c(2,3,4,1,1,1), ncol=2)
 if (!file.exists(cache.file)) {
     classes <- list(factor=c("g"))

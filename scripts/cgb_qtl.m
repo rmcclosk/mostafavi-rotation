@@ -17,7 +17,7 @@ searchParameter.nophenotype = true;
 % read the data
 fid = fopen(fullfile('results', 'multi_qtl_data.tsv'));
 header = strsplit(fgetl(fid), '\t');
-fmt = [repmat('%s', 1, 5), repmat('%f', 1, 4)];
+fmt = [repmat('%s', 1, 5), repmat('%f', 1, 7)];
 data = textscan(fid, fmt, 'Delimiter', '\t', 'TreatAsEmpty', {'NA'});
 fclose(fid);
 
