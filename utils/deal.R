@@ -4,10 +4,8 @@ library(deal)
 
 best.nets.exhaustive <- function (data, banlist=NULL) {
     net <- network(data)
-    prior <- jointprior(net)
     banlist(net) <- banlist
-    net <- learn(net, data, prior)$nw
-    all.nets <- networkfamily(data, net, prior)
+    all.nets <- networkfamily(data, net)
     all.nets <- nwfsort(all.nets$nw)
     
     scores <- sapply(all.nets, "[[", "score")

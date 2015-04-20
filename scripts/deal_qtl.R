@@ -7,7 +7,6 @@ library(ggplot2)
 source(file=file.path("utils", "deal.R"))
 
 cache.file <- file.path("cache", "deal_qtl.Rdata")
-banlist <- matrix(c(2,3,4,1,1,1), ncol=2)
 if (!file.exists(cache.file)) {
     classes <- list(factor=c("g"))
     data <- fread(file.path("results", "multi_qtl_data.tsv"), colClasses=classes)
@@ -16,10 +15,10 @@ if (!file.exists(cache.file)) {
     setkey(data, snp, projid)
     tops <- do.call(rbind, by(data, data[,snp], function (x) {
         net.data <- x[,c("g", "e", "ace", "me"), with=FALSE]
-        t1 <- modelstring(best.nets.exhaustive(net.data, banlist=banlist)[[1]])
+        t1 <- modelstring(best.nets.exhaustive(net.data)[[1]])
         net.data <- x[,c("g", "e.orig", "ace.orig", "me.orig"), with=FALSE]
         setnames(net.data, c("e.orig", "ace.orig", "me.orig"), c("e", "ace", "me"))
-        t2 <- modelstring(best.nets.exhaustive(net.data, banlist=banlist)[[1]])
+        t2 <- modelstring(best.nets.exhaustive(net.data)[[1]])
         c(reduced=t1, original=t2)
     }))
     save(tops, file=cache.file)

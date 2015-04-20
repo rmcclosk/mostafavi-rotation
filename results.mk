@@ -36,7 +36,7 @@ $(addprefix results/%QTL/, $(QTL_BEST_FILES)): scripts/qvalue.R $(addprefix resu
 # eQTL/PC1.tsv etc.
 # argument to script is number of processors
 $(addprefix results/%QTL/, $(QTL_RAW_FILES)): scripts/%QTL.R utils/QTL-common.R
-	$^ --args $(shell echo $$LSB_DJOB_NUMPROC)
+	$(word 1, $^) --args $(shell echo $$LSB_DJOB_NUMPROC)
 
 # results/pairs/ace_me.tsv etc.
 # requires results/ace_e_pairs.tsv etc.

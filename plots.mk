@@ -24,7 +24,7 @@ plots: $(addprefix plots/,qtl_pca.png \
 						  bnlearn_pairs.png)
 
 plots/bnlearn_pairs.png: scripts/bnlearn_pairs.R results/triples_data.tsv
-	$(word 1, $^)
+	$(word 1, $^) --args $(shell echo $$LSB_DJOB_NUMPROC)
 
 plots/compare_modules.png: results/compare_modules.gv
 	dot -Tpng $^ > $@

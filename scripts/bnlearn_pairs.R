@@ -35,7 +35,7 @@ fix.topology <- function (t) {
 }
 
 checksum <- substr(md5sum(file.path("results", "triples_data.tsv")), 1, 6)
-cache.file <- file.path("cache", paste0("deal_pairs_", checksum, ".Rdata"))
+cache.file <- file.path("cache", paste0("bnlearn_pairs_", checksum, ".Rdata"))
 
 if (!file.exists(cache.file)) {
     data <- fread(file.path("results", "triples_data.tsv"))
@@ -69,10 +69,10 @@ p <- ggplot(tops, aes(x=topology)) +
     coord_flip() +
     facet_grid(~data.type)
 
-png(file.path("plots", "deal_triples.png"))
+png(file.path("plots", "bnlearn_pairs.png"))
 print(p)
 dev.off()
 
-pdf(file.path("plots", "deal_triples.pdf"))
+pdf(file.path("plots", "bnlearn_pairs.pdf"))
 print(p)
 dev.off()
