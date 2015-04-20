@@ -139,9 +139,10 @@ get.all.qtls <- function (gene, genepos, patients, outdir, ncpus=1) {
 
 # like get.all.qtls, but it accepts two data sets instead of 1, and compares
 # them to each other rather than to the SNPs
+# the second data type passed is treated the same way as SNPs are in QTL analysis
 get.all.pairs <- function (data1, data1pos, data2, data2pos, pc.rm, cvrt, outfile) {
     # add second position column
-    data2pos$pos2 <- data2pos$pos
+    data1pos$pos1 <- data1pos$pos
 
     # match positions to data
     data1pos <- data1pos[na.omit(match(colnames(data1), feature)),]
@@ -179,5 +180,5 @@ get.all.pairs <- function (data1, data1pos, data2, data2pos, pc.rm, cvrt, outfil
 
     setDF(data1pos)
     setDF(data2pos)
-    do.matrix.eqtl(data1, data2, data2pos, data1pos, outfile, cvrt)
+    do.matrix.eqtl(data2, data1, data1pos, data2pos, outfile, cvrt)
 }

@@ -1,7 +1,10 @@
 # This is the Makefile for everything in the results directory, which contains
 # 'raw' results (ie. tsv files).
 
-results: $(PAIR_BEST_PATHS)
+results: results/triples.tsv
+
+results/triples.tsv: scripts/triples.R $(PAIR_BEST_PATHS)
+	$(word 1, $^)
 
 results/compare_modules.gv: utils/compare_graphs.py results/deal_modules.gv results/cgb_modules.gv
 	$^ > $@
@@ -29,7 +32,7 @@ $(addprefix results/%QTL/, $(QTL_BEST_FILES)): scripts/qvalue.R $(addprefix resu
 
 # eQTL/PC1.tsv etc.
 # argument to script is number of processors
-$(addprefix results/%QTL/, $(QTL_RAW_FILES)): scripts/%QTL.R
+$(addprefix results/%QTL/, $(QTL_RAW_FILES)): scripts/%QTL.R utils/QTL-common.R
 	$^ --args $(shell echo $$LSB_DJOB_NUMPROC)
 
 # results/pairs/ace_me.tsv etc.

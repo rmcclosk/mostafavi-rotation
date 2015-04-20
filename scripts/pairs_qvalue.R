@@ -14,7 +14,7 @@ feature.vars <- paste0("feature.", data.types)
 data <- fread(cor.file)
 
 # adjust P-values of second data type
-data[,adj.p.value := p.adjust(p.value, method="holm"), by=eval(feature.vars[2])]
+data[,adj.p.value := p.adjust(p.value, method="holm"), by=eval(feature.vars[1])]
 
 # take best P-value for each feature of first data type
 setkeyv(data, c(feature.vars[1], "adj.p.value"))
