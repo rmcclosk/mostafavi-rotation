@@ -40,8 +40,16 @@ use `make somedir/somefile`, where `somedir/somefile` is the file you want to
 produce (probably something in results, plots, or tables). You can use `make
 -B` to force the file to be remade, even if make thinks it's up to date.
 
+The Rdata files in the cache folder are generally named out of a hash of the
+script's input data, so that if the data changes, you shouldn't need to
+manually delete the Rdata. However, if the script is altered significantly
+enough that the Rdata file needs to change, it will have to be manually
+deleted.
+
 Folder structure
 ----------------
+
+Each folder has its own README listing all the files contained in it.
 
 __data__ contains all the raw data.
 
@@ -56,7 +64,6 @@ of all QTLs.
 __plots__ and __tables__ contain figures and summary tables.
 
 __cache__ is used to store `.RData` files so that scripts can be run more
-quickly subsequent times. If anything in the data changes, these files will
-need to be manually deleted so that scripts won't use old versions of data.
+quickly subsequent times. 
 
 __doc__ contains presentation material.

@@ -21,7 +21,8 @@ plots: $(addprefix plots/,qtl_pca.png \
 						  summary.png \
 						  qtl_venn.png \
 						  qtl_example.png \
-						  bnlearn_pairs.png)
+						  bnlearn_pairs.png \
+						  meqtl_pca.png)
 
 plots/bnlearn_pairs.png: scripts/bnlearn_pairs.R results/triples_data.tsv
 	$(word 1, $^) --args $(shell echo $$LSB_DJOB_NUMPROC)
@@ -34,6 +35,9 @@ plots/deal_qtl.png: scripts/deal_qtl.R utils/deal.R results/multi_qtl_data.tsv
 
 plots/cgb_qtl.png: scripts/cgb_qtl.m $(CGB_UTILS) results/multi_qtl_data.tsv
 	matlab -nodisplay -singleCompThread < $(word 1, $^)
+
+plots/meqtl_pca.png: scripts/meqtl_pca.R $(QTL_BEST_PATHS)
+	$(word 1, $^)
 
 plots/qtl_pca.png: scripts/qtl_pca.R $(QTL_BEST_PATHS)
 	$(word 1, $^)

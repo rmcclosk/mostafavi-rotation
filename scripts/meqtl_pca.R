@@ -5,6 +5,7 @@
 library(reshape2)
 library(data.table)
 library(ggplot2)
+library(tools)
 source(file=file.path("utils", "load_data.R"))
 source(file=file.path("utils", "misc.R"))
 
@@ -16,13 +17,15 @@ cor.spearman <- function (x, y)
 cor.pca <- function (geno, methyl) 
     -log10(cor.spearman(geno, prcomp(methyl)$x[,1]))
 
-cache.file <- file.path("cache", "meqtl_pca.Rdata")
+meqtl.file <- file.path("results", "meQTL", paste0("PC", pc.use, ".best.tsv"))
+checksum <- substr(md5sum(meqtl.file), 1, 6)
+cache.file <- file.path("cache", paste0("meqtl_pca_", checksum, ".Rdata"))
+
 if (!file.exists(cache.file)) {
     # read patient IDs
     patients <- load.patients()
     
     # read meQTLs
-    meqtl.file <- file.path("results", "meQTL", paste0("PC", pc.use, ".best.tsv"))
     meqtl <- fread(meqtl.file)[q.value < 0.05,]
     meqtl[,n.cpgs := length(feature), by=snp]
     meqtl <- meqtl[n.cpgs > 1,]
