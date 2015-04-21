@@ -42,7 +42,7 @@ data[,model := factor(model, levels=model.types)]
 
 p <- ggplot(data, aes(x=model)) +
     geom_histogram() +
-    facet_grid(mediator~phenotype) +
+    facet_grid(mediator~phenotype, labeller = label_both) +
     theme_bw() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
