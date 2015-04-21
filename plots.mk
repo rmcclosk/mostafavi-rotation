@@ -22,7 +22,11 @@ plots: $(addprefix plots/,qtl_pca.png \
 						  qtl_venn.png \
 						  qtl_example.png \
 						  bnlearn_pairs.png \
-						  meqtl_pca.png)
+						  meqtl_pca.png \
+						  cit_qtl.png)
+
+plots/cit_qtl.png: scripts/cit_qtl.R utils/cit.R results/multi_qtl_data.tsv
+	$(word 1, $^)
 
 plots/bnlearn_pairs.png: scripts/bnlearn_pairs.R results/triples_data.tsv
 	$(word 1, $^) --args $(shell echo $$LSB_DJOB_NUMPROC)
@@ -57,8 +61,8 @@ plots/non_int_snps.png: scripts/non_int_snps.R $(QTL_RAW_PATHS)
 plots/deal_phenotypes.png: scripts/deal_phenotypes.R data/patients.tsv
 	$(word 1, $^)
 
-plots/mediation_qtl.png: scripts/mediation_qtl.R results/multi_qtl_data.tsv
-	$(word 1, $^)
+tables/mediation_%.md plots/mediation_%.png: scripts/mediation_%.R results/multi_%_data.tsv
+	$(word 1, $^) --args $(shell echo $$LSB_DJOB_NUMPROC)
 
 plots/datatypes_venn.png: scripts/datatypes_venn.R data/patients.tsv
 	$(word 1, $^)
