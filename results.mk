@@ -9,16 +9,9 @@ results/triples_data.tsv: scripts/triples_data.R results/triples.tsv
 results/triples.tsv: scripts/triples.R $(PAIR_BEST_PATHS)
 	$(word 1, $^)
 
-results/compare_modules.gv: utils/compare_graphs.py results/deal_modules.gv results/cgb_modules.gv
-	$^ > $@
-
 # deal_modules.gv and deal_phenotypes.gv
 results/deal_%.gv: utils/net2gv.py results/deal_%.net
 	$(word 1,$^) < $(word 2,$^) > $@
-
-# cgb_modules.gv and cgb_phenotypes.gv
-results/cgb_%.gv: scripts/cgb_%.m 
-	matlab -nodisplay -singleCompThread < $^
 
 results/multi_qtl_data.tsv: scripts/multi_qtl_data.R results/multi_qtl.tsv
 	$(word 1, $^)

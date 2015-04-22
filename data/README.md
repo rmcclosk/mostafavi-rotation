@@ -59,7 +59,7 @@ of comparisons made per gene.
 __sign_modules_celltypes_PC_Rosemary.txt__: I'm not actually sure what this is.
 Sara asked me to do a Bayes net analysis on it.
 
-__snp.txtz__: Affy 6 SNPs which have been lifted over to hg38 co-ordinates
+__snp.txt__: Affy 6 SNPs which have been lifted over to hg38 co-ordinates
 from snpArrayAffy6.txt.gz.
 
 __techvars_plus_phenotypes26SEP2014.txt__: Technical variables related to

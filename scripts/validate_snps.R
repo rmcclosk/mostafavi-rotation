@@ -6,10 +6,12 @@
 library(data.table)
 library(qvalue)
 library(ggplot2)
+library(tools)
 
 source(file=file.path("utils", "load_data.R"))
 
-cache.file <- file.path("cache", "validate_snps.Rdata")
+checksum <- substr(md5sum(file.path("data", "ROSMAP_brain_rnaseq_best_eQTL.txt")), 1, 6)
+cache.file <- file.path("cache", paste0("validate_snps_", checksum, ".Rdata"))
 
 if (!file.exists(cache.file)) {
     keeps <- c("PROBE", "SNP", "PERMUTATIONP")

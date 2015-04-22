@@ -71,3 +71,5 @@ data/genotype_manifest.tsv: scripts/genotype_manifest.R
 
 data/patients.tsv: scripts/patients.R
 	$^ > $@
+
+.INTERMEDIATE: data/hg19ToHg38.over.chain.gz

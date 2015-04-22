@@ -12,9 +12,6 @@ plots: $(addprefix plots/,qtl_pca.png \
 						  deal_phenotypes.png \
 						  deal_modules.png \
 						  deal_qtl.png \
-						  cgb_phenotypes.png \
-						  cgb_modules.png \
-						  cgb_qtl.png \
 						  mediation_qtl.png \
 						  compare_modules.png \
 						  datatypes_venn.png \
@@ -36,9 +33,6 @@ plots/compare_modules.png: results/compare_modules.gv
 
 plots/deal_qtl.png: scripts/deal_qtl.R utils/deal.R results/multi_qtl_data.tsv
 	$(word 1, $^)
-
-plots/cgb_qtl.png: scripts/cgb_qtl.m $(CGB_UTILS) results/multi_qtl_data.tsv
-	matlab -nodisplay -singleCompThread < $(word 1, $^)
 
 plots/meqtl_pca.png: scripts/meqtl_pca.R $(QTL_BEST_PATHS)
 	$(word 1, $^)
@@ -80,10 +74,6 @@ plots/deal%.png results/deal%.net: scripts/deal%.R data/module_means_filtered_by
 # qtl_overlap.png and tables/qtl_overlap.md
 plots/qtl_%.png tables/qtl_%.md: scripts/qtl_%.R $(QTL_BEST_PATHS)
 	$(word 1, $^)
-
-# cgb_modules.png and cgb_phenotypes.png
-plots/cgb%.png: results/cgb%.gv
-	dot -Tpng $^ > $@
 
 # plots/phenotypes.png and plots/phenotypes/*.png
 plots/%.png plots/%/%.png: scripts/%.R
