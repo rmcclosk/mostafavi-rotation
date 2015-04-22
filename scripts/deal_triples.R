@@ -1,5 +1,8 @@
 #!/usr/bin/env Rscript
 
+# run deal on all correlated gene/peak/CpG triples
+# mostly copypasta from deal_qtl.R
+
 library(data.table)
 library(reshape2)
 library(ggplot2)
@@ -7,18 +10,18 @@ library(tools)
 
 source(file=file.path("utils", "deal.R"))
 
-checksum <- substr(md5sum(file.path("results", "multi_qtl_data.tsv")), 1, 6)
-cache.file <- file.path("cache", paste0("deal_qtl_", checksum, ".Rdata"))
+checksum <- substr(md5sum(file.path("results", "triples_data.tsv")), 1, 6)
+cache.file <- file.path("cache", paste0("deal_triples_", checksum, ".Rdata"))
 
 if (!file.exists(cache.file)) {
-    data <- fread(file.path("results", "multi_qtl_data.tsv"))
-    data[,g := as.factor(g)]
+    data <- fread(file.path("results", "triples_data.tsv"))
     
-    setkey(data, snp, projid)
-    tops <- do.call(rbind, by(data, data[,snp], function (x) {
-        net.data <- x[,c("g", "e", "ace", "me"), with=FALSE]
+    stopifnot(data[,length(unique(feature.e)) * length(unique(projid)) == nrow(.SD)])
+    setkey(data, feature.e, projid)
+    tops <- do.call(rbind, by(data, data[,feature.e], function (x) {
+        net.data <- x[,c("e", "ace", "me"), with=FALSE]
         t1 <- modelstring(best.nets.exhaustive(net.data)[[1]])
-        net.data <- x[,c("g", "e.orig", "ace.orig", "me.orig"), with=FALSE]
+        net.data <- x[,c("e.orig", "ace.orig", "me.orig"), with=FALSE]
         setnames(net.data, c("e.orig", "ace.orig", "me.orig"), c("e", "ace", "me"))
         t2 <- modelstring(best.nets.exhaustive(net.data)[[1]])
         c(reduced=t1, original=t2)
@@ -42,10 +45,10 @@ p <- ggplot(tops, aes(x=topology)) +
     coord_flip() +
     facet_grid(~data.type)
 
-png(file.path("plots", "deal_qtl.png"))
+png(file.path("plots", "deal_triples.png"))
 print(p)
 dev.off()
 
-pdf(file.path("plots", "deal_qtl.pdf"))
+pdf(file.path("plots", "deal_triples.pdf"))
 print(p)
 dev.off()

@@ -2,17 +2,43 @@
 
 library(deal)
 
-best.nets.exhaustive <- function (data, banlist=NULL) {
-    net <- network(data)
-    banlist(net) <- banlist
-    all.nets <- networkfamily(data, net)
-    all.nets <- nwfsort(all.nets$nw)
-    
-    scores <- sapply(all.nets, "[[", "score")
-    relscores <- sapply(all.nets, "[[", "relscore")
-    all.nets[sapply(relscores, all.equal, 1) == "TRUE"]
+# remove a node from model strings representing networks
+rm.node <- function (strings, node) {
+    strings <- gsub(sprintf("|%s]", node), "]", strings, fixed=TRUE)
+    strings <- gsub(sprintf(":%s", node), "", strings, fixed=TRUE)
+    strings <- gsub(sprintf("[%s]", node), "", strings, fixed=TRUE)
+    gsub(sprintf("\\[%s\\|[[:alnum:]:]*\\]", node), "", strings)
 }
 
+# find the best deal network by exhaustive search
+best.nets.exhaustive <- function (data) {
+
+    cont.only <- !any(lapply(data, class) == "factor")
+
+    # hack so it works with continuous-only data
+    # add a dummy factor with one level
+    if (cont.only) {
+        dummy <- tail(make.unique(c(colnames(data), "dummy")), 1)
+        data[,dummy] <- factor(1)
+    }
+    
+    # run the network
+    all.nets <- nwfsort(unique(getnetwork(networkfamily(data)), equi=TRUE))
+    scores <- sapply(all.nets, "[[", "relscore")
+
+    # if it was continuous only data, remove the dummy factor
+    if (cont.only) {
+        data[,dummy] <- NULL
+        empty.net <- network(data)
+
+        strings <- rm.node(sapply(all.nets, modelstring), dummy)
+        all.nets <- lapply(strings, as.network, empty.net)
+    }
+
+    all.nets[sapply(scores, all.equal, 1) == "TRUE"]
+}
+
+# find the best deal network by a heuristic
 best.net.heuristic <- function (data) {
     net <- network(data)
     prior <- jointprior(net)

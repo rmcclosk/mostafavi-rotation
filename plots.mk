@@ -21,15 +21,15 @@ plots: $(addprefix plots/,qtl_pca.png \
 						  summary.png \
 						  qtl_venn.png \
 						  qtl_example.png \
-						  bnlearn_pairs.png \
+						  deal_triples.png \
 						  meqtl_pca.png \
 						  cit_qtl.png)
 
 plots/cit_qtl.png: scripts/cit_qtl.R utils/cit.R results/multi_qtl_data.tsv
 	$(word 1, $^)
 
-plots/bnlearn_pairs.png: scripts/bnlearn_pairs.R results/triples_data.tsv
-	$(word 1, $^) --args $(shell echo $$LSB_DJOB_NUMPROC)
+plots/deal_triples.png: scripts/deal_triples.R results/triples_data.tsv
+	$(word 1, $^)
 
 plots/compare_modules.png: results/compare_modules.gv
 	dot -Tpng $^ > $@
