@@ -24,13 +24,7 @@ if (!file.exists(cache.file)) {
     load(cache.file)
 }
 
-p <- ggplot(manifest, aes(x=count)) + geom_histogram(binwidth=1) + theme_bw() + 
-     labs(x="SNPs with non-integer counts", y="count of patients")
-
 pdf(file.path("plots", "non_int_patients.pdf"))
-print(p)
-dev.off()
-
-png(file.path("plots", "non_int_patients.png"))
-print(p)
+ggplot(manifest, aes(x=count)) + geom_histogram(binwidth=1) + theme_bw() + 
+     labs(x="SNPs with non-integer counts", y="count of patients")
 dev.off()

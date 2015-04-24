@@ -26,18 +26,12 @@ data <- lapply(data, cbind, pc.rm=1:20)
 data <- as.data.frame(do.call(rbind, data))
 data <- melt(data, id.vars=c("pc.rm", "difference"), variable.name="data.type", value.name="qtls")
 
-p <- ggplot(data, aes(x=pc.rm, y=qtls, color=difference)) +
+pdf(file.path("plots", "pca_overlap.pdf"))
+ggplot(data, aes(x=pc.rm, y=qtls, color=difference)) +
      geom_point() +
      geom_line() +
      theme_bw() +
      facet_grid(data.type~., scales="free") +
      xlab("PCs removed") +
      ylab("significant features")
-
-png(file.path("plots", "pca_overlap.png"))
-print(p)
-dev.off()
-
-pdf(file.path("plots", "pca_overlap.pdf"))
-print(p)
 dev.off()

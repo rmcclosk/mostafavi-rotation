@@ -7,11 +7,7 @@ library(qvalue)
 library(knitr)
 library(VennDiagram)
 library(pheatmap)
-library(rolasized)
-library(tikzDevice)
 library(pryr)
-
-sol <- solarized.Colours(variant = "srgb")
 
 data.types <- c("e", "ace", "me")
 data.use <- c(e="PC10", ace="PC10", me="PC10")
@@ -76,17 +72,9 @@ cat(kable(overlap.size, "markdown"), file=file.path("tables", "qtl_overlap.md"),
 
 overlap.prop <- round(overlap.size*100/diag(overlap.size))
 
-png(file.path("plots", "qtl_overlap.png"))
+pdf(file.path("plots", "qtl_overlap.pdf"), onefile=FALSE)
 pheatmap(overlap.prop, cluster_rows=FALSE, cluster_cols=FALSE, 
          legend=FALSE, fontsize=18, fontsize_number=18, 
-         display_numbers=TRUE,
-         color=colorRampPalette(c(sol$base2, sol$orange))(100),
+         display_numbers=TRUE, breaks=0:100,
          number_format="%.0f %%")
-dev.off()
-
-tikz(file.path("plots", "qtl_overlap.tex"), width=2.5, height=2.5, fg=sol$base00, bg=sol$base3)
-pheatmap(round(overlap.prop), cluster_rows=FALSE, cluster_cols=FALSE, 
-         legend=FALSE, display_numbers=TRUE,
-         color=colorRampPalette(c(sol$base2, sol$orange))(100),
-         number_format="%.0f \\%%")
 dev.off()

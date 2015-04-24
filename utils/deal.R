@@ -1,6 +1,8 @@
 # some functions common to multiple deal analyses
 
 library(deal)
+library(Rgraphviz)
+library(graph)
 
 # remove a node from model strings representing networks
 rm.node <- function (strings, node) {
@@ -46,4 +48,20 @@ best.net.heuristic <- function (data) {
     search <- autosearch(net, data, prior, trace=TRUE)
     heuristic(search$nw, data, prior, restart=2, degree=10, trace=TRUE,
               trylist=search$trylist)$nw
+}
+
+plot.net.graphviz <- function (net, engine="dot", edge.attrs=list(), node.attrs=list(), graph.attrs=list()) {
+    parents <- sapply(net$nodes, "[[", "parents")
+    node.names <- sapply(net$nodes, "[[", "name")
+
+    to.nodes <- rep(names(parents), lapply(parents, length))
+    from.nodes <- node.names[unlist(parents)]
+    edges <- data.frame(from=from.nodes, to=to.nodes, stringsAsFactors=FALSE)
+    edges <- tapply(edges$to, edges$from, list, simplify=FALSE)
+    edges <- lapply(edges, setNames, "edges")
+
+    leaves <- setdiff(node.names, names(edges))
+    edges <- c(edges, sapply(leaves, function (x) NULL, simplify=FALSE, USE.NAMES=TRUE))
+    g <- graphNEL(node.names, edges, "directed")
+    plot(g, engine, attrs=list(edge=edge.attrs, node=node.attrs, graph=graph.attrs))
 }

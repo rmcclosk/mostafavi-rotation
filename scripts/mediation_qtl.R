@@ -14,6 +14,7 @@ source(file=file.path("utils", "causal.R"))
 ncpus <- commandArgs(trailingOnly=TRUE)[2]
 
 vars <- c("e", "ace", "me")
+vars.long <- c("expression", "acetylation", "methylation")
 tests <- subset(expand.grid(vars, vars), Var1 != Var2)
 tests <- rbind(tests, apply(tests, 2, paste0, ".orig"))
 
@@ -44,16 +45,20 @@ if (!file.exists(cache.file)) {
 
 setnames(med, c("Var1", "Var2"), c("mediator", "phenotype"))
 med[, data.type := ifelse(grepl("orig", mediator), "original", "reduced")]
-med[, mediator := gsub(".orig", "", mediator)]
-med[, phenotype := gsub(".orig", "", phenotype)]
+med <- med[data.type == "reduced"]
+
+med[,mediator := factor(mediator, levels=vars, labels=vars.long)]
+med[,phenotype := factor(phenotype, levels=vars, labels=vars.long)]
 
 tbl <- med[p.value < 0.05 & data.type == "reduced", table(mediator, phenotype)]
-tbl <- tbl/med[,sum(data.type == "reduced")/6]
-disp.tbl <- round(tbl*100) # percentage
+tbl <- round(tbl*100/med[,sum(data.type == "reduced")/6])
+disp.tbl <- apply(tbl, 2, paste, "%")
 diag(disp.tbl) <- ""
 cat(kable(disp.tbl, "markdown"), file=file.path("tables", "mediation_qtl.md"), sep="\n")
 
 diag(tbl) <- NA
-png(file.path("plots", "mediation_qtl.png"))
-pheatmap(tbl, cluster_rows=FALSE, cluster_columns=FALSE, fontsize=20)
+# http://stackoverflow.com/questions/12481267/in-r-how-to-prevent-blank-page-in-pdf-when-using-gridbase-to-embed-subplot-insi
+pdf(file.path("plots", "mediation_qtl.pdf"), onefile=FALSE)
+pheatmap(tbl, cluster_rows=FALSE, cluster_cols=FALSE, fontsize=20,
+         legend=FALSE, display_numbers=disp.tbl, breaks=0:100)
 dev.off()

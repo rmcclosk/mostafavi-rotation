@@ -19,7 +19,8 @@ data <- lapply(data, melt, id.vars="patient", variable.name="statistic")
 data <- mapply(cbind, data, data.type=names(data), SIMPLIFY=FALSE)
 data <- do.call(rbind, data)
 
-p <- ggplot(data, aes(x=patient, y=value, color=statistic, group=statistic)) +
+pdf(file.path("plots", "summary.pdf"))
+ggplot(data, aes(x=patient, y=value, color=statistic, group=statistic)) +
     geom_line() +
     facet_grid(data.type~., scales="free") +
     theme_bw() +
@@ -27,11 +28,4 @@ p <- ggplot(data, aes(x=patient, y=value, color=statistic, group=statistic)) +
           axis.text.x = element_blank(),
           panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank())
-
-pdf(file.path("plots", "summary.pdf"))
-print(p)
-dev.off()
-
-png(file.path("plots", "summary.png"))
-print(p)
 dev.off()

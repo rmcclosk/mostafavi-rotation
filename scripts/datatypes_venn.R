@@ -5,10 +5,7 @@
 
 library(data.table)
 library(VennDiagram)
-library(rolasized)
 library(tikzDevice)
-
-sol <- solarized.Colours(variant = "srgb")
 
 data <- fread(file.path("data", "patients.tsv"))
 
@@ -25,28 +22,16 @@ areas <- lapply(lapply(combos, function(x) Reduce(intersect,data[x]) ), length)
 
 venn.args <- areas
 venn.args[["category"]] <- c("expression", "methylation", "acetylation", "genotype")
-venn.args[["fill"]] <- c(sol$red, sol$blue, sol$green, sol$violet)
-venn.args[["col"]] <- c(sol$red, sol$green, sol$violet, sol$blue)
+venn.args[["fill"]] <- c("red", "blue", "forestgreen", "violet")
+venn.args[["col"]] <- c("red", "forestgreen", "violet", "blue")
 venn.args[["cex"]] = 1.5
 venn.args[["cat.cex"]] = 1.5
 venn.args[["ind"]] = FALSE
 venn.args[["margin"]] = 0.05
 venn.args[["alpha"]] = 0.2
-venn.args[["cat.col"]] = sol$base00
-venn.args[["label.col"]] = sol$base00
 venn.args[["fontfamily"]] = "Helvetica"
 venn.args[["cat.fontfamily"]] = "Helvetica"
 
-png(file.path("plots", "datatypes_venn.png"), bg="transparent")
-grid.draw(do.call(draw.quad.venn, venn.args))
-dev.off()
-
 pdf(file.path("plots", "datatypes_venn.pdf"), bg="transparent")
-grid.draw(do.call(draw.quad.venn, venn.args))
-dev.off()
-
-tikz(file.path("plots", "datatypes_venn.tex"), width=3.2, height=3, bg=sol$base3, fg=sol$base00)
-venn.args[["cex"]] = 1
-venn.args[["cat.cex"]] = 1
 grid.draw(do.call(draw.quad.venn, venn.args))
 dev.off()

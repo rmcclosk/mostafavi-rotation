@@ -60,23 +60,14 @@ if (!file.exists(cache.file)) {
     load(cache.file)
 }
 
-#stats <- melt(stats, id.vars="snp", variable.name="statistic", value.name="value")
-#levels(stats$statistic) <- c("PC1", "Min.", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max.")
-
 stats <- melt(stats, id.vars=c("snp", "PC1"), variable.name="statistic", value.name="value")
-stats[PC1 == Inf, PC1 := 200] # TODO: better value
+stats[PC1 == Inf, PC1 := 200] # perfect correlation?
 
-p <- ggplot(stats, aes(x=value, y=PC1)) +
+pdf(file.path("plots", "meqtl_pca.pdf"))
+ggplot(stats, aes(x=value, y=PC1)) +
     stat_binhex() +
     labs(x="-log10 P-value of correlation with CpG", y="-log10 P-value of correlation with PC1")  +
     facet_wrap(~statistic) +
     theme_bw() +
     geom_abline(intercept=0, slope=1, color="red")
-
-png(file.path("plots", "meqtl_pca.png"))
-print(p)
-dev.off()
-
-pdf(file.path("plots", "meqtl_pca.pdf"))
-print(p)
 dev.off()

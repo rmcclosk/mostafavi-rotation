@@ -20,6 +20,7 @@ checksum <- substr(md5sum(file.path("results", "multi_qtl_data.tsv")), 1, 6)
 cache.file <- file.path("cache", paste0("cit_qtl_", checksum, ".Rdata"))
 
 data.types <- c("e", "ace", "me")
+data.types.long <- c("expression", "acetylation", "methylation")
 tests <- setDT(expand.grid(mediator=data.types, phenotype=data.types, stringsAsFactors=FALSE))
 tests <- tests[mediator != phenotype]
 
@@ -36,20 +37,16 @@ if (!file.exists(cache.file)) {
     load(cache.file)
 }
 
-model.types <- c("no call", "causal", "reactive", "independent/other")
+model.types <- c("no call", "causal", "reactive", "indep./other")
 data[,model := model.types[model+1]]
 data[,model := factor(model, levels=model.types)]
+data[,phenotype := factor(phenotype, levels=data.types, labels=data.types.long)]
+data[,mediator := factor(mediator, levels=data.types, labels=data.types.long)]
 
-p <- ggplot(data, aes(x=model)) +
+pdf(file.path("plots", "cit_qtl.pdf"))
+ggplot(data, aes(x=model)) +
     geom_histogram() +
     facet_grid(mediator~phenotype, labeller = label_both) +
     theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-png(file.path("plots", "cit_qtl.png"))
-print(p)
-dev.off()
-
-pdf(file.path("plots", "cit_qtl.pdf"))
-print(p)
+    theme(axis.text.x = element_text(angle = 90, vjust=0.5, hjust=1))
 dev.off()

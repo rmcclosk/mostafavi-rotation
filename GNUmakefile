@@ -27,7 +27,7 @@ PAIR_RAW_PATHS = $(addprefix results/, ace_e_pairs.tsv ace_me_pairs.tsv e_me_pai
 # files where q-value processed pair correlations are stored: results/pairs/ace_e.tsv etc.
 PAIR_BEST_PATHS = $(addsuffix .tsv, $(addprefix results/pairs/, ace_e ace_me e_ace e_me me_ace me_e))
 
-all: results tables plots doc
+all: results tables plots
 
 include doc.mk
 include plots.mk

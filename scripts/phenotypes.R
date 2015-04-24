@@ -12,12 +12,8 @@ data[which(data[,cvars] == 0, arr.ind=TRUE)] <- NA
 data[,dvars] <- lapply(data[,dvars], ordered, levels=c(0, 1))
 data <- na.omit(data)
 
-png(file.path("plots", "phenotypes.png"))
-ggpairs(data)
+colnames(data) <- c("tangles", "amyloid", "globcog", "pathoAD", "pmAD")
+pdf(file.path("plots", "phenotypes.pdf"))
+theme_set(theme_bw())
+ggpairs(data) 
 dev.off()
-
-. <- sapply(cvars, function (v) {
-    png(sprintf(file.path("plots", "phenotypes", "%s.png"), v))
-    print(ggplot(data, aes_string(x=v)) + geom_density())
-    dev.off()
-})

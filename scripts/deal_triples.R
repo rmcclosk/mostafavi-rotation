@@ -39,16 +39,10 @@ tops[! topology %in% keeps, topology := "other"]
 tops <- tops[order(count),]
 tops[,topology := factor(topology, levels=unique(topology))]
 
-p <- ggplot(tops, aes(x=topology)) + 
+pdf(file.path("plots", "deal_triples.pdf"))
+ggplot(tops, aes(x=topology)) + 
     geom_histogram() +
     theme_bw() +
     coord_flip() +
     facet_grid(~data.type)
-
-png(file.path("plots", "deal_triples.png"))
-print(p)
-dev.off()
-
-pdf(file.path("plots", "deal_triples.pdf"))
-print(p)
 dev.off()

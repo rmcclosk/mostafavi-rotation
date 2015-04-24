@@ -59,15 +59,9 @@ get.cor.p <- function (snp.ours, snp.theirs) {
 
 qtl.data[,cor.p := get.cor.p(snp.ours, snp.theirs), feature]
 
-p <- ggplot(qtl.data, aes(x=cor.p)) + 
+pdf(file.path("plots", "validate_snps.pdf"))
+ggplot(qtl.data, aes(x=cor.p)) + 
     geom_density() + 
     theme_bw() + 
     labs(x="P-value of correlation")
-
-pdf(file.path("plots", "validate_snps.pdf"))
-print(p)
-dev.off()
-
-png(file.path("plots", "validate_snps.png"))
-print(p)
 dev.off()
