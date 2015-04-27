@@ -11,6 +11,6 @@ files <- sprintf(file.path("results", "%sQTL", "PC%d.best.tsv"), data.types, pc.
 data <- lapply(files, fread)
 
 tbl <- as.data.frame(lapply(data, "[", j=sum(q.value < 0.05)))
-colnames(tbl) <- data.types
+colnames(tbl) <- c("genes", "peaks", "CpGs")
 sink()
 kable(tbl, "markdown")

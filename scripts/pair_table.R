@@ -6,6 +6,7 @@ library(knitr)
 source(file=file.path("utils", "load_data.R"))
 
 data.types <- c("e", "ace", "me")
+data.types.long <- c("expression", "acetylation", "methylation")
 
 count.signif <- Vectorize(function (dt1, dt2) {
     file.name <- sprintf("%s_%s.tsv", dt1, dt2)
@@ -23,6 +24,6 @@ tbl <- setDT(expand.grid(data.types, data.types))
 tbl[which(Var1 != Var2), count := count.signif(Var1, Var2)]
 tbl[which(Var1 == Var2), count := count.all(Var1)]
 tbl <- matrix(tbl$count, nrow=3)
-dimnames(tbl) <- list(data.types, data.types)
+dimnames(tbl) <- list(data.types.long, data.types.long)
 
 kable(tbl, "markdown")

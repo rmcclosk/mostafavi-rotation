@@ -33,11 +33,12 @@ if (!file.exists(cache.file)) {
     load(cache.file)
 }
 
-w <- nice.dim(length(best.nets))
-h <- length(best.nets)/w
+best.nets <- unique(best.nets)
+h <- nice.dim(length(best.nets))
+w <- length(best.nets)/h
 
 pdf(file.path("plots", "deal_phenotypes.pdf"), width=4*w, height=4*h)
-par(mfrow=c(w, h))
+par(mfrow=c(h, w))
 sapply(best.nets, plot.net.graphviz,
                   engine="circo",
                   edge.attrs=list(arrowhead="open"),

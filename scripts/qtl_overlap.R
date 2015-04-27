@@ -19,6 +19,7 @@ best <- lapply(sprintf(best.file, data.types, data.use), fread, select=c("snp", 
 
 # take significant associations only
 best <- lapply(best, subset, q.value < 0.05)
+n.features <- sapply(best, nrow)
 
 # we only need each SNP once
 lapply(best, setkey, snp)
@@ -70,7 +71,7 @@ overlap.size <- matrix(sapply(overlap, length), nrow=length(data.types))
 dimnames(overlap.size) <- list(qtl.names, qtl.names)
 cat(kable(overlap.size, "markdown"), file=file.path("tables", "qtl_overlap.md"), sep="\n")
 
-overlap.prop <- round(overlap.size*100/diag(overlap.size))
+overlap.prop <- round(overlap.size*100/n.features)
 
 pdf(file.path("plots", "qtl_overlap.pdf"), onefile=FALSE)
 pheatmap(overlap.prop, cluster_rows=FALSE, cluster_cols=FALSE, 
