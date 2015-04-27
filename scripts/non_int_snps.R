@@ -40,7 +40,7 @@ manifest <- rbind(manifest, rbindlist(cis.snps))
 pdf(file.path("plots", "non_int_snps.pdf"), width=7*1.5, height=7*0.75)
 ggplot(manifest, aes(x=count)) + 
      geom_histogram(binwidth=1) +
-     labs(x="samples with non-integer data", y="number of SNPs") +
+     labs(x="samples per SNP with non-integer data", y="number of SNPs") +
      theme_bw() +
      scale_y_log10() +
      facet_wrap(~snp.type)

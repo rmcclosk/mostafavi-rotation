@@ -35,6 +35,18 @@ interconnectedness among modules, but limited connectivity between modules and
 phenotypes. This suggests that only a small number of gene modules can be
 directly implicated in cognitive decline.
 
+__deal_phenotypes__: Four equivalently optimal Bayesian networks describe the
+relationships between five phenotype variables important in Alzheimer's
+disease. All networks agree that a diagnosis of Alzheimer's is causative of
+changes in amyloid load, tangles, and cognitive decline rates, rather than the
+reverse.
+
+__deal_qtl__: Distribution of Bayesian network topologies estimated for each
+set of multi-QTL associated data. The most common topology, both in the
+original and prinicipal component-reduced data, was the independence structure
+with all phenotypes influenced only by genotype. The number of multi-QTLs
+exhibiting this independence structure was greater in the PC-reduced data.
+
 References
 ----------
 
