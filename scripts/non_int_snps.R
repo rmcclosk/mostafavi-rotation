@@ -4,6 +4,7 @@ library(ggplot2)
 source(file=file.path("utils", "load_data.R"))
 
 data.types <- c("e", "ace", "me")
+feature.types <- c(e="TSS", ace="peak", me="CpG")
 qtl.files <- file.path("results", paste0(data.types, "QTL"), "PC10.tsv")
 
 cache.file <- file.path("cache", "non_int_snps.Rdata")
@@ -33,7 +34,7 @@ manifest[,snp.type := "all"]
 setkey(manifest, snp)
 
 cis.snps <- lapply(data.types, function (d) {
-    copy(manifest[cis.snps[[d]]])[, snp.type := paste0("cis-", d)]
+    copy(manifest[cis.snps[[d]]])[, snp.type := paste0("cis-", feature.types[[d]])]
 })
 manifest <- rbind(manifest, rbindlist(cis.snps))
 
