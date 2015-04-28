@@ -1,4 +1,3 @@
-\definecolor{base3}{HTML}{FDF6E3}
 \begin{tikzpicture}
     \node (g) {GATTACA};
     \draw (g.north west) -- (g.north east);
@@ -8,9 +7,9 @@
     \node [below right= of g.south] (m2) {};
     \draw [decorate, decoration={snake, segment length=6mm, amplitude=2mm}] (m1) -- (m2);
     \draw [decorate, decoration={snake, segment length=6mm, amplitude=2mm, pre length=3mm}] (m1) -- (m2);
-    \node [right=1cm of m1.north, anchor=south, circle, draw, fill=base3] (me) { };
+    \node [right=1cm of m1.north, anchor=south, circle, draw, fill=white] (me) { };
     \node [below right=-0.1 of me.south east, anchor=north west, circle, draw, fill=gray, inner sep=2pt] { };
-    \node [right=1cm of m1.north, anchor=south, circle, draw, fill=base3] (me) { };
+    \node [right=1cm of m1.north, anchor=south, circle, draw, fill=white] (me) { };
     \node [below left=-0.1 of me.south west, anchor=north east, circle, draw, fill=gray, inner sep=2pt] { };
     \node [above=-0.1 of me.north, anchor=south, circle, draw, fill=gray, inner sep=2pt] { };
 
@@ -47,8 +46,8 @@
     }
 
     \node [above right=2mm of e1, text width=2cm] {gene \\ expression};
-    \node [left=2mm of m1, fill=base3, inner sep=0pt, align=right] {methylation};
-    \node [left=5mm of a1, fill=base3, inner sep=0pt, text width=2cm,
+    \node [left=2mm of m1, fill=white, inner sep=0pt, align=right] {methylation};
+    \node [left=5mm of a1, fill=white, inner sep=0pt, text width=2cm,
     align=right] {histone \\ acetylation};
-    \node [left=5mm of g.west, fill=base3, inner sep=0pt, align=right] {genotype};
+    \node [left=5mm of g.west, fill=white, inner sep=0pt, align=right] {genotype};
 \end{tikzpicture}

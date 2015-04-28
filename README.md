@@ -8,10 +8,11 @@ This README is about the code side of the project: how the files and folders
 are organized, and how to rerun all the analyses and produce all the figures
 and tables. For the science side, I have written a summary which can be found
 [here](https://github.com/rmcclosk/mostafavi-rotation/wiki/Summary). The
-summary should be read first. Note that the repo, and the wiki, are private.
+summary should probably be read first, to get an idea of some of the
+vocabulary.
 
-I have tried to document everything as thoroughly as possible, but please
-contact me at <rmcclosk.math@gmail.com> if you have any questions.
+I have tried to document everything thoroughly, but please contact me at
+<rmcclosk.math@gmail.com> if you have any questions.
 
 Set up
 ------
@@ -24,6 +25,17 @@ shell.
     use Tex-Latex
     use Graphviz
     use ImageMagick
+
+The Broad's version of R comes with almost every package, but you will have to
+install a few on your own.
+
+* `pryr` and `MatrixEQTL` using `install.packages`
+* `qvalue` and `Rgraphviz` using `biocLite`
+* the newest version of `pheatmap` using `install.packages`
+
+Note that `pheatmap` is included in the Broad's R, but I use a feature which
+isn't available in the included version, so you need to upgrade to the latest
+version.
 
 Running everything
 ------------------
@@ -101,13 +113,28 @@ Gotchas
 There are a few things I would like to have done differently in this project,
 and that might trip up somebody trying to take over. These are documented here.
 
-Firstly, a lot of the analyses remove 10 principal components from the gene
-expression, acetylation, and methylation data. This is intended to remove broad
-effects and get the data down to the level where genetic factors have an effect.
-However, the number 10 is arbitrary and was chosen based on visual inspection
-of [this plot]
+A lot of the analyses remove 10 principal components from the gene expression,
+acetylation, and methylation data. This is intended to remove broad effects and
+get the data down to the level where genetic factors have an effect.  However,
+the number 10 is arbitrary and was chosen based on visual inspection of [this
+plot]
 (https://github.com/rmcclosk/mostafavi-rotation/blob/master/plots/qtl_pca.png).
 Unfortunately, instead of making a global script containing the number 10, I
 put it at the top of basically every analysis file. If you come up with a more
 rigorous way of deciding how many PCs to remove, pretty much every script will
 need to be modified.
+
+Most of the analyses are done in the same scripts as make the plots,
+meaning that the raw results are not stored anywhere. For example, the
+individual p-values for each mediation test are thrown away after the plot of
+the calls is made. In order to get at these results, you'll have to open up the
+script that makes the relevant plot and save an intermediate data object. The
+results that are used in multiple places are saved in the results directory.
+
+The documentation isn't too reproducible. The presentation (in the doc folder)
+can be made with make, but the numbers in the text may not match the numbers in
+the figures, and some of the figures have been modified since and might not fit
+very well on the slides anymore. The poster isn't even in the repo, because I
+got lazy. The summary document on the github wiki also has most of the numbers
+typed out by hand.
+

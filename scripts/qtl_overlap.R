@@ -1,6 +1,15 @@
 #!/usr/bin/env Rscript
 
-# Find overlapping QTLs using pi_1.
+# Find QTLs for multiple types of data using the two-step multiple testing
+# approach. 
+#
+# For example, suppose we want to determine what proportion of eQTLs are also
+# meQTLs. For each eQTL, we would consider all the CpGs within cis-distance of
+# the position of the eQTL (the SNP). A p-value is associated to each CpG by
+# Spearman correlation with the SNP in question. These p-values are then
+# corrected by the Holm-Bonferroni method, and the lowest corrected p-value is
+# associated to the eQTL. After each eQTL has been assigned an adjusted p-value
+# in this fashion, q-values are computed from those p-values 
 
 library(data.table)
 library(qvalue)
