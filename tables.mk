@@ -7,7 +7,6 @@ tables: $(addprefix tables/,qtl_table.md \
 						 	pair_table.md \
 							missing.md \
 							qtl_overlap.md \
-							mediation_qtl.md \
 							count_features.md)
 
 tables/qtl_table.md: scripts/qtl_table.R $(foreach DIR, $(QTL_FOLDERS), $(DIR)/PC0.tsv $(DIR)/PC0.best.tsv $(DIR)/PC0.nocov.best.tsv)
