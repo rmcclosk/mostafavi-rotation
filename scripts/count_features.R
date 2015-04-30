@@ -1,5 +1,10 @@
 #!/usr/bin/env Rscript
 
+# Make a simple table counting the number of features of each data type tested.
+# This uses the results of the QTL analyses, so if a feature had no SNPs within
+# cis-distance, it wouldn't be included in this count. I don't think there are
+# any features like that though.
+
 sink("/dev/null")
 library(data.table)
 library(knitr)
